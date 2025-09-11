@@ -7,7 +7,9 @@ import ImageUploader from '@/components/ui/ImageUploader';
 import PatientVitalsForm from '@/components/ui/PatientVitalsForm';
 import { XRayImage, AnalysisResult, PatientVitals } from '@/types';
 import { analyzeXray } from '@/utils/predictionService';
-import { ArrowRight, ArrowLeft, Loader2, CheckCircle2, HelpCircle, Image, Stethoscope, Upload } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Loader2, CheckCircle2, HelpCircle, Image, Stethoscope, Upload, Mic } from 'lucide-react';
+import VoiceRecorder from '@/components/ui/VoiceRecorder';
+import { multimodalDiagnose } from '@/utils/multimodalService';
 
 export default function AnalyzePage() {
   // State definitions
@@ -20,6 +22,7 @@ export default function AnalyzePage() {
     1: false,
     2: false
   });
+  const [transcript, setTranscript] = useState<string>("");
   const router = useRouter();
 
   // Handle image selection
@@ -38,7 +41,7 @@ export default function AnalyzePage() {
 
   // Navigate to next step
   const goToNextStep = () => {
-    if (currentStep < 3) {
+    if (currentStep < 4) {
       setCurrentStep(currentStep + 1);
     }
   };
@@ -88,7 +91,7 @@ export default function AnalyzePage() {
   // Progress indicator component
   const ProgressSteps = () => (
     <div className="flex items-center justify-center mb-8">
-      {[1, 2, 3].map((step) => (
+      {[1, 2, 3, 4].map((step) => (
         <div key={step} className="flex items-center">
           <div 
             className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200
@@ -113,7 +116,7 @@ export default function AnalyzePage() {
             )}
           </div>
           
-          {step < 3 && (
+          {step < 4 && (
             <div className={`w-20 h-1 mx-1 
               ${currentStep > step || (currentStep === step && stepComplete[step])
                 ? 'bg-green-500 dark:bg-green-400' 
@@ -130,12 +133,14 @@ export default function AnalyzePage() {
     const titles = [
       "Upload X-Ray Image",
       "Enter Patient Vitals",
+      "Symptoms (Optional Voice)",
       "Review and Submit"
     ];
     
     const icons = [
       <Image key="image" className="w-6 h-6 mr-2" />,
       <Stethoscope key="stethoscope" className="w-6 h-6 mr-2" />,
+      <Mic key="mic" className="w-6 h-6 mr-2" />,
       <Upload key="upload" className="w-6 h-6 mr-2" />
     ];
     
@@ -222,10 +227,42 @@ export default function AnalyzePage() {
             </div>
           )}
 
-          {/* Step 3: Review and Submit */}
+          {/* Step 3: Optional Voice Symptoms */}
           {currentStep === 3 && (
             <div className="animate-fadeIn">
               <StepTitle step={3} />
+              <p className="text-gray-600 dark:text-gray-400 mb-6">Record a short voice note describing symptoms like cough, fever, or breathlessness.</p>
+              <VoiceRecorder
+                onTranscribed={(text) => {
+                  setTranscript(text);
+                  setStepComplete(prev => ({...prev, 3: true}));
+                }}
+                onError={(m) => setError(m)}
+                className="mb-6"
+              />
+              <div className="flex justify-between mt-8">
+                <button
+                  onClick={goToPrevStep}
+                  className="flex items-center py-2 px-6 border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 rounded-md shadow-sm transition-colors"
+                >
+                  <ArrowLeft className="mr-2 h-5 w-5" />
+                  Previous Step
+                </button>
+                <button
+                  onClick={goToNextStep}
+                  className="flex items-center py-2 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow transition-colors"
+                >
+                  Next Step
+                  <ArrowRight className="ml-2 h-5 w-5" />
+                </button>
+              </div>
+            </div>
+          )}
+
+          {/* Step 4: Review and Submit */}
+          {currentStep === 4 && (
+            <div className="animate-fadeIn">
+              <StepTitle step={4} />
               
               <div className="grid md:grid-cols-2 gap-6 mb-8">
                 {/* X-ray Image Preview */}
@@ -298,6 +335,15 @@ export default function AnalyzePage() {
                     </div>
                   )}
                 </div>
+                {/* Transcript Summary */}
+                <div className="md:col-span-2 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
+                  <h3 className="text-lg font-semibold mb-3 flex items-center">
+                    <Mic className="w-5 h-5 mr-2" />Symptoms Voice Transcript
+                  </h3>
+                  <div className="text-sm whitespace-pre-wrap min-h-[48px]">
+                    {transcript || 'No voice transcript provided.'}
+                  </div>
+                </div>
               </div>
               
               {error && (
@@ -316,7 +362,27 @@ export default function AnalyzePage() {
                 </button>
 
                 <button
-                  onClick={handleAnalyze}
+                  onClick={async () => {
+                    if (!image || !vitals) {
+                      setError('Please upload image and vitals.');
+                      return;
+                    }
+                    setIsAnalyzing(true);
+                    setError(null);
+                    try {
+                      const result = await multimodalDiagnose({ image: image.file, vitals, transcript });
+                      sessionStorage.setItem('xrayResult', JSON.stringify(result));
+                      sessionStorage.setItem('originalImageUrl', image.preview);
+                      sessionStorage.setItem('patientVitals', JSON.stringify(vitals));
+                      sessionStorage.setItem('voiceTranscript', transcript || '');
+                      router.push('/result');
+                    } catch (err) {
+                      console.error('Analysis error:', err);
+                      setError('Failed to analyze the data. Please try again.');
+                    } finally {
+                      setIsAnalyzing(false);
+                    }
+                  }}
                   disabled={isAnalyzing || !image || !vitals}
                   className="flex items-center py-3 px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
                 >
