@@ -106,7 +106,7 @@ export default function AboutPage() {
         <h2 className="text-xl font-bold mb-3">Important Disclaimer</h2>
         <div className="text-gray-700 dark:text-gray-300">
           <p className="mb-2">
-            CDSS X-Ray is designed as a decision support tool and is not intended to replace professional medical judgment. All AI predictions should be interpreted by qualified healthcare professionals in conjunction with clinical findings and other diagnostic tests.
+            Xray Setu is designed as a decision support tool and is not intended to replace professional medical judgment. All AI predictions should be interpreted by qualified healthcare professionals in conjunction with clinical findings and other diagnostic tests.
           </p>
           <p>
             This system has been developed for educational and research purposes. Validation in clinical settings may be required before implementation in actual patient care scenarios.
