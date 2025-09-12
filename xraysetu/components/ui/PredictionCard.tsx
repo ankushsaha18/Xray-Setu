@@ -24,7 +24,19 @@ const PredictionCard: React.FC<PredictionCardProps> = ({ result, className = '' 
   } else {
     // Handle the flat object structure
     diagnosisEntries = Object.entries(result)
-      .filter(([key]) => !['age', 'topPrediction', 'predictions', 'heatmapUrl', 'regions', 'severity', 'diagnosisWithVitals', 'treatmentSuggestions', 'vitals'].includes(key))
+      .filter(([key, value]) => ![
+        'age',
+        'topPrediction',
+        'predictions',
+        'heatmapUrl',
+        'regions',
+        'severity',
+        'diagnosisWithVitals',
+        'treatmentSuggestions',
+        'vitals',
+        'imaging',
+        'derivedSymptoms',
+      ].includes(key) && typeof value === 'number' && isFinite(value as number))
       .map(([label, confidence]) => ({ label, confidence: Number(confidence) }))
       .sort((a, b) => b.confidence - a.confidence);
   }

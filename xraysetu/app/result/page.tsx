@@ -92,15 +92,18 @@ export default function ResultPage() {
     }
     
     // If both COVID-19 and Pneumonia are below the normal threshold, normalize the results
-    const covidValue = data['Covid-19'] || 0;
-    const pneumoniaValue = data['Pneumonia'] || 0;
+    const covidValue = typeof data['Covid-19'] === 'number' ? data['Covid-19'] : 0;
+    const pneumoniaValue = typeof data['Pneumonia'] === 'number' ? data['Pneumonia'] : 0;
     
     if (covidValue < NORMAL_THRESHOLD && pneumoniaValue < NORMAL_THRESHOLD) {
       // Set the case to normal by boosting the normal prediction
       // We keep the original values but ensure "normal" is the highest
-      if (data['Normal']) {
-        // Find the current highest value
-        const maxValue = Math.max(...Object.values(data) as number[]);
+      if (typeof data['Normal'] === 'number') {
+        // Find the current highest numeric value
+        const numericValues = Object.entries(data)
+          .filter(([key, value]) => typeof value === 'number')
+          .map(([_, value]) => value as number);
+        const maxValue = numericValues.length ? Math.max(...numericValues) : 0;
         // Set normal to be higher than the current max value
         processedData['Normal'] = Math.max(data['Normal'] as number, maxValue + 0.1);
       } else {

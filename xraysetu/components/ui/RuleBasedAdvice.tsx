@@ -200,6 +200,39 @@ const RuleBasedAdvice: React.FC<RuleBasedAdviceProps> = ({ result, className = '
   };
   
   const advice = getAdvice();
+
+  // Symptom-aware supportive care suggestions (from voice transcript extraction)
+  const derivedSymptoms: Record<string, boolean> = result.derivedSymptoms || {};
+  const symptomRecommendations: string[] = [];
+
+  if (derivedSymptoms.cough) {
+    symptomRecommendations.push(
+      'Hydration and warm fluids; consider honey (if not diabetic) and steam inhalation',
+      'Over-the-counter cough suppressant if troubling (per local guidelines)'
+    );
+  }
+  if (derivedSymptoms.fever_symptom) {
+    symptomRecommendations.push(
+      'Paracetamol/acetaminophen for fever as per dosing guidelines',
+      'Adequate oral fluids and rest'
+    );
+  }
+  if (derivedSymptoms.breathlessness) {
+    symptomRecommendations.push(
+      'Monitor SpO2 if available; seek urgent care if SpO2 < 94% or worsening',
+      'Avoid exertion; maintain upright position during episodes'
+    );
+  }
+  if (derivedSymptoms.chest_pain) {
+    symptomRecommendations.push(
+      'Chest pain can be serious; seek urgent medical evaluation, especially if severe or persistent'
+    );
+  }
+  if (derivedSymptoms.loss_of_smell) {
+    symptomRecommendations.push(
+      'Loss of smell often recovers over weeks; consider olfactory training exercises'
+    );
+  }
   
   return (
     <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 ${className}`}>
@@ -225,6 +258,19 @@ const RuleBasedAdvice: React.FC<RuleBasedAdviceProps> = ({ result, className = '
               <span className="text-sm text-gray-700 dark:text-gray-300">{rec}</span>
             </li>
           ))}
+          {symptomRecommendations.length > 0 && (
+            <li className="mt-2">
+              <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Symptom-guided care</div>
+              <ul className="space-y-1">
+                {symptomRecommendations.map((rec, i) => (
+                  <li key={`sym-${i}`} className="flex items-start">
+                    <span className="mr-2 mt-0.5 text-blue-500 dark:text-blue-400">•</span>
+                    <span className="text-sm text-gray-700 dark:text-gray-300">{rec}</span>
+                  </li>
+                ))}
+              </ul>
+            </li>
+          )}
         </ul>
       </div>
       
