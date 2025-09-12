@@ -1,7 +1,7 @@
 'use client';
 
 import { useState } from 'react';
-import { Mail, Phone, MapPin, Send, Github } from 'lucide-react';
+import { Mail, Phone, MapPin, Send,} from 'lucide-react';
 
 export default function ContactPage() {
   const [formState, setFormState] = useState({
@@ -86,7 +86,7 @@ export default function ContactPage() {
                 <Phone className="h-6 w-6 text-blue-600 dark:text-blue-400 mr-3 mt-1" />
                 <div>
                   <p className="font-medium">Phone</p>
-                  <p className="text-gray-600 dark:text-gray-400">+1 (555) 123-4567</p>
+                  <p className="text-gray-600 dark:text-gray-400">+91 1234567890</p>
                 </div>
               </li>
               <li className="flex items-start">
@@ -94,8 +94,6 @@ export default function ContactPage() {
                 <div>
                   <p className="font-medium">Location</p>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Healthcare Innovation Center<br />
-                    123 Medical Drive<br />
                     Bhubaneswar,<br />
                      Odisha, India
                   </p>
