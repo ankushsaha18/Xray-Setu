@@ -94,32 +94,42 @@ export default function VoiceRecorder({ onTranscribed, onError, language, classN
 
   return (
     <div className={className}>
-      <div className="flex items-center gap-3">
+      <div className="flex items-center gap-4">
         {!isRecording ? (
           <button
             onClick={startRecording}
-            className="px-4 py-2 rounded bg-emerald-600 hover:bg-emerald-700 text-white"
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-primary-500 to-emerald-500 hover:from-primary-600 hover:to-emerald-600 text-white shadow-lg transform hover:-translate-y-0.5 transition-all"
           >
             {permissionDenied ? 'Retry Mic' : 'Record Symptoms'}
           </button>
         ) : (
           <button
             onClick={stopRecording}
-            className="px-4 py-2 rounded bg-red-600 hover:bg-red-700 text-white"
+            className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg transform hover:-translate-y-0.5 transition-all flex items-center"
           >
+            <span className="w-3 h-3 bg-white rounded-full mr-2 animate-pulse"></span>
             Stop Recording
           </button>
         )}
-        {loading && <span className="text-sm text-gray-500">Transcribing…</span>}
+        {loading && <span className="text-gray-400 flex items-center">
+          <svg className="animate-spin -ml-1 mr-2 h-5 w-5 text-primary-500" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
+            <circle className="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="4"></circle>
+            <path className="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path>
+          </svg>
+          Transcribing…
+        </span>}
       </div>
       {transcript && (
-        <div className="mt-3 text-sm p-3 rounded border border-gray-200 dark:border-gray-700 bg-gray-50 dark:bg-gray-800">
-          <div className="font-medium mb-1">Transcript</div>
-          <div className="whitespace-pre-wrap">{transcript}</div>
+        <div className="mt-6 p-5 rounded-xl border border-gray-700 bg-gray-800/50">
+          <div className="font-semibold mb-2 text-white flex items-center">
+            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary-400" viewBox="0 0 20 20" fill="currentColor">
+              <path fillRule="evenodd" d="M9.383 3.076A1 1 0 0110 4v12a1 1 0 01-1.707.707L4.586 13H2a1 1 0 01-1-1V8a1 1 0 011-1h2.586l3.707-3.707a1 1 0 011.09-.217zM14.657 2.929a1 1 0 011.414 0A9.972 9.972 0 0119 10a9.972 9.972 0 01-2.929 7.071 1 1 0 01-1.414-1.414A7.971 7.971 0 0017 10c0-2.21-.894-4.208-2.343-5.657a1 1 0 010-1.414zm-2.829 2.828a1 1 0 011.415 0A5.983 5.983 0 0115 10a5.984 5.984 0 01-1.757 4.243 1 1 0 01-1.415-1.415A3.984 3.984 0 0013 10a3.983 3.983 0 00-1.172-2.828 1 1 0 010-1.415z" clipRule="evenodd" />
+            </svg>
+            Transcript
+          </div>
+          <div className="text-gray-300 whitespace-pre-wrap">{transcript}</div>
         </div>
       )}
     </div>
   );
 }
-
-

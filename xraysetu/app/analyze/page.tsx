@@ -7,7 +7,7 @@ import ImageUploader from '@/components/ui/ImageUploader';
 import PatientVitalsForm from '@/components/ui/PatientVitalsForm';
 import { XRayImage, AnalysisResult, PatientVitals } from '@/types';
 import { analyzeXray } from '@/utils/predictionService';
-import { ArrowRight, ArrowLeft, Loader2, CheckCircle2, HelpCircle, Image, Stethoscope, Upload, Mic } from 'lucide-react';
+import { ArrowRight, ArrowLeft, Loader2, CheckCircle2, HelpCircle, Image, Stethoscope, Upload, Mic, FileText } from 'lucide-react';
 import VoiceRecorder from '@/components/ui/VoiceRecorder';
 import { multimodalDiagnose } from '@/utils/multimodalService';
 
@@ -91,16 +91,16 @@ export default function AnalyzePage() {
 
   // Progress indicator component
   const ProgressSteps = () => (
-    <div className="flex items-center justify-center mb-8">
+    <div className="flex items-center justify-center mb-10">
       {[1, 2, 3, 4].map((step) => (
         <div key={step} className="flex items-center">
           <div 
-            className={`flex items-center justify-center w-10 h-10 rounded-full border-2 transition-all duration-200
+            className={`flex items-center justify-center w-12 h-12 rounded-full border-2 transition-all duration-300
               ${currentStep === step 
-                ? 'border-blue-600 bg-blue-50 text-blue-600 dark:bg-blue-900/30 dark:border-blue-500' 
+                ? 'border-primary-500 bg-primary-500 text-white shadow-lg' 
                 : currentStep > step || stepComplete[step]
-                  ? 'border-green-500 bg-green-50 text-green-500 dark:bg-green-900/30 dark:border-green-400'
-                  : 'border-gray-300 text-gray-500 dark:border-gray-600'
+                  ? 'border-primary-400 bg-primary-400 text-white'
+                  : 'border-gray-300 text-gray-500 dark:border-gray-600 dark:bg-gray-800'
               }`}
             onClick={() => {
               // Only allow clicking on completed steps or the current step + 1 if previous is complete
@@ -111,17 +111,17 @@ export default function AnalyzePage() {
             style={{ cursor: (step < currentStep || (step === currentStep + 1 && stepComplete[currentStep])) ? 'pointer' : 'default' }}
           >
             {currentStep > step || stepComplete[step] ? (
-              <CheckCircle2 className="w-5 h-5" />
+              <CheckCircle2 className="w-6 h-6" />
             ) : (
-              <span className="font-medium">{step}</span>
+              <span className="font-bold">{step}</span>
             )}
           </div>
           
           {step < 4 && (
-            <div className={`w-20 h-1 mx-1 
+            <div className={`w-16 h-1 mx-2 rounded-full
               ${currentStep > step || (currentStep === step && stepComplete[step])
-                ? 'bg-green-500 dark:bg-green-400' 
-                : 'bg-gray-300 dark:bg-gray-600'}`}
+                ? 'bg-gradient-to-r from-primary-500 to-emerald-500' 
+                : 'bg-gray-200 dark:bg-gray-700'}`}
             ></div>
           )}
         </div>
@@ -139,27 +139,31 @@ export default function AnalyzePage() {
     ];
     
     const icons = [
-      <Image key="image" className="w-6 h-6 mr-2" />,
-      <Stethoscope key="stethoscope" className="w-6 h-6 mr-2" />,
-      <Mic key="mic" className="w-6 h-6 mr-2" />,
-      <Upload key="upload" className="w-6 h-6 mr-2" />
+      <Image key="image" className="w-6 h-6 mr-3" />,
+      <Stethoscope key="stethoscope" className="w-6 h-6 mr-3" />,
+      <Mic key="mic" className="w-6 h-6 mr-3" />,
+      <FileText key="file" className="w-6 h-6 mr-3" />
     ];
     
     return (
-      <div className="flex items-center mb-4">
-        {icons[step-1]}
-        <h2 className="text-2xl font-bold">{titles[step-1]}</h2>
+      <div className="flex items-center mb-6">
+        <div className="p-3 rounded-xl bg-primary-900/30 text-primary-400 mr-4">
+          {icons[step-1]}
+        </div>
+        <h2 className="text-2xl font-bold text-white">{titles[step-1]}</h2>
       </div>
     );
   };
 
   return (
     <ProtectedRoute>
-      <div className="max-w-5xl mx-auto px-4 py-8">
-        <div className="mb-8">
-          <h1 className="text-3xl font-bold mb-2">Analyze Chest X-Ray</h1>
-          <p className="text-gray-600 dark:text-gray-400">
-            Upload a chest X-ray image and provide patient vitals for AI-assisted analysis.
+      <div className="max-w-6xl mx-auto px-4 py-8">
+        <div className="mb-10 text-center">
+          <h1 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary-400 to-emerald-400">
+            AI-Powered X-Ray Analysis
+          </h1>
+          <p className="text-gray-400 max-w-2xl mx-auto">
+            Upload a chest X-ray image and provide patient information for AI-assisted diagnostic analysis.
           </p>
         </div>
 
@@ -167,270 +171,299 @@ export default function AnalyzePage() {
         <ProgressSteps />
 
         {/* Main content area */}
-        <div className="bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 mb-8">
-          {/* Step 1: Upload X-ray Image */}
-          {currentStep === 1 && (
-            <div className="animate-fadeIn">
-              <StepTitle step={1} />
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Please upload a clear, high-quality chest X-ray image. The system works best with frontal (PA/AP) views.
-              </p>
-              <ImageUploader 
-                onImageSelect={handleImageSelect} 
-                className="mb-6"
-                maxSizeMB={15} 
-              />
-
-              <div className="flex justify-between mt-8">
-                <div></div> {/* Empty div for spacing */}
-                <button
-                  onClick={goToNextStep}
-                  disabled={!stepComplete[1]}
-                  className="flex items-center py-2 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                  Next Step
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 2: Patient Vitals */}
-          {currentStep === 2 && (
-            <div className="animate-fadeIn">
-              <StepTitle step={2} />
-              <p className="text-gray-600 dark:text-gray-400 mb-6">
-                Enter accurate patient vital signs and symptoms to receive more precise diagnostic suggestions.
-              </p>
-              <PatientVitalsForm 
-                onSubmit={handleVitalsSubmit} 
-                isSubmitting={isAnalyzing} 
-              />
-
-              <div className="flex justify-between mt-8">
-                <button
-                  onClick={goToPrevStep}
-                  className="flex items-center py-2 px-6 border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 rounded-md shadow-sm transition-colors"
-                >
-                  <ArrowLeft className="mr-2 h-5 w-5" />
-                  Previous Step
-                </button>
-
-                <button
-                  onClick={goToNextStep}
-                  disabled={!stepComplete[2]}
-                  className="flex items-center py-2 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                  Next Step
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 3: Optional Voice Symptoms */}
-          {currentStep === 3 && (
-            <div className="animate-fadeIn">
-              <StepTitle step={3} />
-              <p className="text-gray-600 dark:text-gray-400 mb-6">Record a short voice note describing symptoms like cough, fever, or breathlessness.</p>
-              
-              {/* Language Selection */}
-              <div className="mb-4">
-                <label className="block text-sm font-medium mb-2">Select Language</label>
-                <select 
-                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-700 dark:border-gray-600"
-                  defaultValue="en"
-                  onChange={(e) => setSelectedLanguage(e.target.value)}
-                >
-                  <option value="en">English</option>
-                  <option value="hi">Hindi (हिंदी)</option>
-                </select>
-              </div>
-              
-              <VoiceRecorder
-                language={selectedLanguage}
-                onTranscribed={(text) => {
-                  setTranscript(text);
-                  setStepComplete(prev => ({...prev, 3: true}));
-                }}
-                onError={(m) => setError(m)}
-                className="mb-6"
-              />
-              <div className="flex justify-between mt-8">
-                <button
-                  onClick={goToPrevStep}
-                  className="flex items-center py-2 px-6 border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 rounded-md shadow-sm transition-colors"
-                >
-                  <ArrowLeft className="mr-2 h-5 w-5" />
-                  Previous Step
-                </button>
-                <button
-                  onClick={goToNextStep}
-                  className="flex items-center py-2 px-6 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow transition-colors"
-                >
-                  Next Step
-                  <ArrowRight className="ml-2 h-5 w-5" />
-                </button>
-              </div>
-            </div>
-          )}
-
-          {/* Step 4: Review and Submit */}
-          {currentStep === 4 && (
-            <div className="animate-fadeIn">
-              <StepTitle step={4} />
-              
-              <div className="grid md:grid-cols-2 gap-6 mb-8">
-                {/* X-ray Image Preview */}
-                <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold mb-3 flex items-center">
-                    <Image className="w-5 h-5 mr-2" />X-ray Image
-                  </h3>
-                  
-                  {image ? (
-                    <div className="rounded-lg overflow-hidden border border-gray-300 dark:border-gray-700 aspect-square">
-                      <img 
-                        src={image.preview} 
-                        alt="X-ray preview" 
-                        className="w-full h-full object-contain"
-                      />
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center h-40 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                      <p className="text-gray-500 dark:text-gray-400">No image uploaded</p>
-                    </div>
-                  )}
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl p-1 border border-gray-700 mb-10">
+          <div className="bg-gray-900 rounded-xl p-6 md:p-8">
+            {/* Step 1: Upload X-ray Image */}
+            {currentStep === 1 && (
+              <div className="animate-fadeIn">
+                <StepTitle step={1} />
+                <p className="text-gray-300 mb-8">
+                  Please upload a clear, high-quality chest X-ray image. The system works best with frontal (PA/AP) views.
+                </p>
+                <div className="mb-8">
+                  <ImageUploader 
+                    onImageSelect={handleImageSelect} 
+                    maxSizeMB={15} 
+                  />
                 </div>
+
+                <div className="flex justify-between mt-8">
+                  <div></div> {/* Empty div for spacing */}
+                  <button
+                    onClick={goToNextStep}
+                    disabled={!stepComplete[1]}
+                    className="flex items-center py-3 px-8 bg-gradient-to-r from-primary-500 to-emerald-500 hover:from-primary-600 hover:to-emerald-600 text-white rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
+                  >
+                    Next Step
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 2: Patient Vitals */}
+            {currentStep === 2 && (
+              <div className="animate-fadeIn">
+                <StepTitle step={2} />
+                <p className="text-gray-300 mb-8">
+                  Enter accurate patient vital signs and symptoms to receive more precise diagnostic suggestions.
+                </p>
+                <div className="mb-8">
+                  <PatientVitalsForm 
+                    onSubmit={handleVitalsSubmit} 
+                    isSubmitting={isAnalyzing} 
+                  />
+                </div>
+
+                <div className="flex justify-between mt-8">
+                  <button
+                    onClick={goToPrevStep}
+                    className="flex items-center py-3 px-8 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-xl shadow transition-all border border-gray-700"
+                  >
+                    <ArrowLeft className="mr-2 h-5 w-5" />
+                    Previous Step
+                  </button>
+
+                  <button
+                    onClick={goToNextStep}
+                    disabled={!stepComplete[2]}
+                    className="flex items-center py-3 px-8 bg-gradient-to-r from-primary-500 to-emerald-500 hover:from-primary-600 hover:to-emerald-600 text-white rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
+                  >
+                    Next Step
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </button>
+                </div>
+              </div>
+            )}
+
+            {/* Step 3: Optional Voice Symptoms */}
+            {currentStep === 3 && (
+              <div className="animate-fadeIn">
+                <StepTitle step={3} />
+                <p className="text-gray-300 mb-8">
+                  Record a short voice note describing symptoms like cough, fever, or breathlessness.
+                </p>
                 
-                {/* Vitals Summary */}
-                <div className="border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold mb-3 flex items-center">
-                    <Stethoscope className="w-5 h-5 mr-2" />Patient Vitals
-                  </h3>
-                  
-                  {vitals ? (
-                    <div className="space-y-3">
-                      <div className="grid grid-cols-2 gap-2">
-                        <div className="bg-gray-50 dark:bg-gray-700/50 p-2 rounded">
-                          <span className="text-gray-500 dark:text-gray-400 text-sm">Temperature</span>
-                          <p className="font-medium">{vitals.temperature}°C</p>
-                        </div>
-                        <div className="bg-gray-50 dark:bg-gray-700/50 p-2 rounded">
-                          <span className="text-gray-500 dark:text-gray-400 text-sm">Heart Rate</span>
-                          <p className="font-medium">{vitals.heartRate} bpm</p>
-                        </div>
-                      </div>
-                      
-                      <div className="bg-gray-50 dark:bg-gray-700/50 p-2 rounded">
-                        <span className="text-gray-500 dark:text-gray-400 text-sm">Blood Pressure</span>
-                        <p className="font-medium">{vitals.systolicBP}/{vitals.diastolicBP} mmHg</p>
-                      </div>
-                      
-                      <div className="bg-gray-50 dark:bg-gray-700/50 p-2 rounded">
-                        <span className="text-gray-500 dark:text-gray-400 text-sm">Demographics</span>
-                        <p className="font-medium">
-                          {vitals.gender.charAt(0).toUpperCase() + vitals.gender.slice(1)}, 
-                          {vitals.birthdate ? ` ${calculateAge(vitals.birthdate)} years` : ''}
-                        </p>
-                      </div>
-                      
-                      <div className="bg-gray-50 dark:bg-gray-700/50 p-2 rounded">
-                        <span className="text-gray-500 dark:text-gray-400 text-sm">Symptoms</span>
-                        <p>
-                          {[
-                            vitals.hasCough ? 'Cough' : null,
-                            vitals.hasHeadaches ? 'Headache' : null,
-                            !vitals.canSmellTaste ? 'Loss of smell/taste' : null
-                          ].filter(Boolean).join(', ') || 'None reported'}
-                        </p>
-                      </div>
-                    </div>
-                  ) : (
-                    <div className="flex items-center justify-center h-40 bg-gray-100 dark:bg-gray-700 rounded-lg">
-                      <p className="text-gray-500 dark:text-gray-400">No vitals entered</p>
-                    </div>
-                  )}
-                </div>
-                {/* Transcript Summary */}
-                <div className="md:col-span-2 border border-gray-200 dark:border-gray-700 rounded-lg p-4">
-                  <h3 className="text-lg font-semibold mb-3 flex items-center">
-                    <Mic className="w-5 h-5 mr-2" />Symptoms Voice Transcript
-                  </h3>
-                  <div className="text-sm whitespace-pre-wrap min-h-[48px]">
-                    {transcript || 'No voice transcript provided.'}
+                {/* Language Selection */}
+                <div className="mb-6">
+                  <label className="block text-gray-300 font-medium mb-3">Select Language</label>
+                  <div className="max-w-xs">
+                    <select 
+                      className="w-full p-3 bg-gray-800 border border-gray-700 rounded-xl focus:ring-2 focus:ring-primary-500 focus:outline-none text-white"
+                      defaultValue="en"
+                      onChange={(e) => setSelectedLanguage(e.target.value)}
+                    >
+                      <option value="en" className="bg-gray-800">English</option>
+                      <option value="hi" className="bg-gray-800">Hindi (हिंदी)</option>
+                    </select>
                   </div>
                 </div>
-              </div>
-              
-              {error && (
-                <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md mb-6 animate-pulse">
-                  <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+                
+                <div className="mb-8">
+                  <VoiceRecorder
+                    language={selectedLanguage}
+                    onTranscribed={(text) => {
+                      setTranscript(text);
+                      setStepComplete(prev => ({...prev, 3: true}));
+                    }}
+                    onError={(m) => setError(m)}
+                  />
                 </div>
-              )}
-              
-              <div className="flex justify-between">
-                <button
-                  onClick={goToPrevStep}
-                  className="flex items-center py-2 px-6 border border-gray-300 dark:border-gray-600 hover:border-gray-400 dark:hover:border-gray-500 rounded-md shadow-sm transition-colors"
-                >
-                  <ArrowLeft className="mr-2 h-5 w-5" />
-                  Previous Step
-                </button>
-
-                <button
-                  onClick={async () => {
-                    if (!image || !vitals) {
-                      setError('Please upload image and vitals.');
-                      return;
-                    }
-                    setIsAnalyzing(true);
-                    setError(null);
-                    try {
-                      const result = await multimodalDiagnose({ image: image.file, vitals, transcript });
-                      sessionStorage.setItem('xrayResult', JSON.stringify(result));
-                      sessionStorage.setItem('originalImageUrl', image.preview);
-                      sessionStorage.setItem('patientVitals', JSON.stringify(vitals));
-                      sessionStorage.setItem('voiceTranscript', transcript || '');
-                      router.push('/result');
-                    } catch (err) {
-                      console.error('Analysis error:', err);
-                      setError('Failed to analyze the data. Please try again.');
-                    } finally {
-                      setIsAnalyzing(false);
-                    }
-                  }}
-                  disabled={isAnalyzing || !image || !vitals}
-                  className="flex items-center py-3 px-8 bg-blue-600 hover:bg-blue-700 text-white rounded-md shadow transition-colors disabled:bg-gray-400 disabled:cursor-not-allowed"
-                >
-                  {isAnalyzing ? (
-                    <>
-                      <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" />
-                      Analyzing...
-                    </>
-                  ) : (
-                    <>
-                      Analyze & Submit
-                      <ArrowRight className="ml-2 h-5 w-5" />
-                    </>
-                  )}
-                </button>
+                
+                <div className="flex justify-between mt-8">
+                  <button
+                    onClick={goToPrevStep}
+                    className="flex items-center py-3 px-8 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-xl shadow transition-all border border-gray-700"
+                  >
+                    <ArrowLeft className="mr-2 h-5 w-5" />
+                    Previous Step
+                  </button>
+                  <button
+                    onClick={goToNextStep}
+                    className="flex items-center py-3 px-8 bg-gradient-to-r from-primary-500 to-emerald-500 hover:from-primary-600 hover:to-emerald-600 text-white rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5"
+                  >
+                    Next Step
+                    <ArrowRight className="ml-2 h-5 w-5" />
+                  </button>
+                </div>
               </div>
-            </div>
-          )}
+            )}
+
+            {/* Step 4: Review and Submit */}
+            {currentStep === 4 && (
+              <div className="animate-fadeIn">
+                <StepTitle step={4} />
+                
+                <div className="grid md:grid-cols-2 gap-8 mb-10">
+                  {/* X-ray Image Preview */}
+                  <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center text-white">
+                      <Image className="w-5 h-5 mr-2 text-primary-400" />X-ray Image
+                    </h3>
+                    
+                    {image ? (
+                      <div className="rounded-lg overflow-hidden border border-gray-700 aspect-square">
+                        <img 
+                          src={image.preview} 
+                          alt="X-ray preview" 
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg border-2 border-dashed border-gray-700">
+                        <p className="text-gray-500">No image uploaded</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Vitals Summary */}
+                  <div className="bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center text-white">
+                      <Stethoscope className="w-5 h-5 mr-2 text-primary-400" />Patient Vitals
+                    </h3>
+                    
+                    {vitals ? (
+                      <div className="space-y-4">
+                        <div className="grid grid-cols-2 gap-4">
+                          <div className="bg-gray-800 p-4 rounded-lg">
+                            <span className="text-gray-400 text-sm">Temperature</span>
+                            <p className="font-medium text-white">{vitals.temperature}°C</p>
+                          </div>
+                          <div className="bg-gray-800 p-4 rounded-lg">
+                            <span className="text-gray-400 text-sm">Heart Rate</span>
+                            <p className="font-medium text-white">{vitals.heartRate} bpm</p>
+                          </div>
+                        </div>
+                        
+                        <div className="bg-gray-800 p-4 rounded-lg">
+                          <span className="text-gray-400 text-sm">Blood Pressure</span>
+                          <p className="font-medium text-white">{vitals.systolicBP}/{vitals.diastolicBP} mmHg</p>
+                        </div>
+                        
+                        <div className="bg-gray-800 p-4 rounded-lg">
+                          <span className="text-gray-400 text-sm">Demographics</span>
+                          <p className="font-medium text-white">
+                            {vitals.gender.charAt(0).toUpperCase() + vitals.gender.slice(1)}, 
+                            {vitals.birthdate ? ` ${calculateAge(vitals.birthdate)} years` : ''}
+                          </p>
+                        </div>
+                        
+                        <div className="bg-gray-800 p-4 rounded-lg">
+                          <span className="text-gray-400 text-sm">Symptoms</span>
+                          <p className="text-white">
+                            {[
+                              vitals.hasCough ? 'Cough' : null,
+                              vitals.hasHeadaches ? 'Headache' : null,
+                              !vitals.canSmellTaste ? 'Loss of smell/taste' : null
+                            ].filter(Boolean).join(', ') || 'None reported'}
+                          </p>
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="flex items-center justify-center h-64 bg-gray-800 rounded-lg">
+                        <p className="text-gray-500">No vitals entered</p>
+                      </div>
+                    )}
+                  </div>
+                  
+                  {/* Transcript Summary */}
+                  <div className="md:col-span-2 bg-gray-800/50 rounded-xl p-6 border border-gray-700">
+                    <h3 className="text-lg font-semibold mb-4 flex items-center text-white">
+                      <Mic className="w-5 h-5 mr-2 text-primary-400" />Symptoms Voice Transcript
+                    </h3>
+                    <div className="text-gray-300 whitespace-pre-wrap min-h-[60px] bg-gray-800 p-4 rounded-lg">
+                      {transcript || 'No voice transcript provided.'}
+                    </div>
+                  </div>
+                </div>
+                
+                {error && (
+                  <div className="p-4 bg-red-900/30 border border-red-700 rounded-xl mb-8 animate-pulse">
+                    <p className="text-red-300">{error}</p>
+                  </div>
+                )}
+                
+                <div className="flex justify-between">
+                  <button
+                    onClick={goToPrevStep}
+                    className="flex items-center py-3 px-8 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-xl shadow transition-all border border-gray-700"
+                  >
+                    <ArrowLeft className="mr-2 h-5 w-5" />
+                    Previous Step
+                  </button>
+
+                  <button
+                    onClick={async () => {
+                      if (!image || !vitals) {
+                        setError('Please upload image and vitals.');
+                        return;
+                      }
+                      setIsAnalyzing(true);
+                      setError(null);
+                      try {
+                        const result = await multimodalDiagnose({ image: image.file, vitals, transcript });
+                        sessionStorage.setItem('xrayResult', JSON.stringify(result));
+                        sessionStorage.setItem('originalImageUrl', image.preview);
+                        sessionStorage.setItem('patientVitals', JSON.stringify(vitals));
+                        sessionStorage.setItem('voiceTranscript', transcript || '');
+                        router.push('/result');
+                      } catch (err) {
+                        console.error('Analysis error:', err);
+                        setError('Failed to analyze the data. Please try again.');
+                      } finally {
+                        setIsAnalyzing(false);
+                      }
+                    }}
+                    disabled={isAnalyzing || !image || !vitals}
+                    className="flex items-center py-3 px-8 bg-gradient-to-r from-primary-500 to-emerald-500 hover:from-primary-600 hover:to-emerald-600 text-white rounded-xl shadow-lg transition-all disabled:opacity-50 disabled:cursor-not-allowed transform hover:-translate-y-0.5"
+                  >
+                    {isAnalyzing ? (
+                      <>
+                        <Loader2 className="animate-spin -ml-1 mr-2 h-5 w-5" />
+                        Analyzing...
+                      </>
+                    ) : (
+                      <>
+                        Analyze & Submit
+                        <ArrowRight className="ml-2 h-5 w-5" />
+                      </>
+                    )}
+                  </button>
+                </div>
+              </div>
+            )}
+          </div>
         </div>
 
         {/* Helpful tips and information card */}
-        <div className="bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-xl p-6">
+        <div className="bg-gradient-to-r from-primary-900/30 to-emerald-900/30 border border-primary-800/50 rounded-2xl p-6">
           <div className="flex items-start">
-            <HelpCircle className="h-6 w-6 text-blue-500 mr-3 flex-shrink-0 mt-0.5" />
+            <div className="p-2 rounded-lg bg-primary-900/50 mr-4">
+              <HelpCircle className="h-6 w-6 text-primary-400" />
+            </div>
             <div>
-              <h3 className="font-semibold text-lg mb-2 text-blue-800 dark:text-blue-300">Tips for Best Analysis</h3>
-              <ul className="space-y-2 text-blue-700 dark:text-blue-200 text-sm">
-                <li>• Use high-quality, properly exposed X-ray images</li>
-                <li>• Ensure patient vitals are accurate and recent</li>
-                <li>• For children under 12, note that normal vital ranges differ</li>
-                <li>• The AI model works best with frontal chest X-rays (PA/AP views)</li>
-                <li>• Image analysis typically takes 15-30 seconds to complete</li>
+              <h3 className="font-semibold text-lg mb-3 text-white">Tips for Best Analysis</h3>
+              <ul className="space-y-2 text-gray-300">
+                <li className="flex items-start">
+                  <span className="text-primary-400 mr-2">•</span>
+                  <span>Use high-quality, properly exposed X-ray images</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-primary-400 mr-2">•</span>
+                  <span>Ensure patient vitals are accurate and recent</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-primary-400 mr-2">•</span>
+                  <span>For children under 12, note that normal vital ranges differ</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-primary-400 mr-2">•</span>
+                  <span>The AI model works best with frontal chest X-rays (PA/AP views)</span>
+                </li>
+                <li className="flex items-start">
+                  <span className="text-primary-400 mr-2">•</span>
+                  <span>Image analysis typically takes 15-30 seconds to complete</span>
+                </li>
               </ul>
             </div>
           </div>

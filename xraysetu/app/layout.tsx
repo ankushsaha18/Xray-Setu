@@ -94,18 +94,20 @@ export default function RootLayout({
         
         <meta name="theme-color" content="#22c55e" />
       </head>
-      <body className="flex flex-col min-h-screen bg-gray-900 text-gray-100">
+      <body className="flex flex-col min-h-screen bg-gray-950 text-gray-100">
         {/* Register service worker for PWA support */}
         <ServiceWorkerRegistration />
         
         {/* Include ThemeToggle component to enforce dark mode on client-side */}
         <AuthProvider>
           <ThemeToggle />
-          <Navbar />
-          <main className="flex-grow">
-            {children}
-          </main>
-          <Footer />
+          <div className="flex flex-col min-h-screen bg-gradient-to-b from-gray-950 to-gray-900">
+            <Navbar />
+            <main className="flex-grow">
+              {children}
+            </main>
+            <Footer />
+          </div>
         </AuthProvider>
       </body>
     </html>

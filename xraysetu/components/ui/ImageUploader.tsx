@@ -176,50 +176,52 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       {!preview ? (
         <div
           {...getRootProps()}
-          className={`border-2 border-dashed rounded-lg p-8 text-center cursor-pointer transition-colors ${
+          className={`border-2 border-dashed rounded-2xl p-10 text-center cursor-pointer transition-all ${
             isDragActive
-              ? 'border-blue-500 bg-blue-50 dark:bg-blue-900/20'
+              ? 'border-primary-500 bg-gradient-to-br from-primary-900/30 to-emerald-900/30 shadow-lg'
               : disabled
-              ? 'border-gray-500 bg-gray-100 dark:bg-gray-800/50 cursor-not-allowed'
-              : 'border-gray-300 dark:border-gray-700 hover:border-blue-400 dark:hover:border-blue-600'
+              ? 'border-gray-600 bg-gray-800/50 cursor-not-allowed'
+              : 'border-gray-600 hover:border-primary-500 bg-gray-800/30 hover:bg-gray-800/50'
           }`}
         >
           <input {...getInputProps()} />
-          <div className="flex flex-col items-center justify-center space-y-3">
-            <Upload className={`h-12 w-12 ${disabled ? 'text-gray-500' : 'text-gray-400 dark:text-gray-500'}`} />
-            <div className={`${disabled ? 'text-gray-500' : 'text-gray-600 dark:text-gray-400'}`}>
+          <div className="flex flex-col items-center justify-center space-y-4">
+            <div className="p-4 rounded-full bg-primary-900/30">
+              <Upload className={`h-10 w-10 ${disabled ? 'text-gray-500' : 'text-primary-400'}`} />
+            </div>
+            <div className={`${disabled ? 'text-gray-500' : 'text-gray-300'}`}>
               {isDragActive ? (
-                <p>Drop the X-ray image here...</p>
+                <p className="text-xl font-semibold">Drop the X-ray image here...</p>
               ) : (
                 <>
-                  <p className="font-medium">
+                  <p className="text-xl font-semibold">
                     {disabled 
                       ? 'Image uploading is disabled'
                       : 'Drag & drop an X-ray image here'
                     }
                   </p>
-                  {!disabled && <p className="text-sm mt-1">or click to select a file</p>}
+                  {!disabled && <p className="text-lg mt-2">or click to select a file</p>}
                 </>
               )}
             </div>
-            <p className="text-xs text-gray-500 dark:text-gray-500">
+            <p className="text-gray-400">
               Supported formats: JPG, JPEG, PNG (Max {maxSizeMB}MB)
             </p>
           </div>
         </div>
       ) : (
         <div className="relative">
-          <div className="absolute top-2 right-2 z-10">
+          <div className="absolute top-3 right-3 z-10">
             <button
               onClick={clearImage}
               disabled={isUploading}
-              className="p-1 bg-gray-800/70 hover:bg-gray-900 rounded-full text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="p-2 bg-gray-900/70 hover:bg-gray-900 rounded-full text-white transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-lg border border-gray-700"
               aria-label="Remove image"
             >
               <X className="h-5 w-5" />
             </button>
           </div>
-          <div className="relative rounded-lg overflow-hidden border border-gray-300 dark:border-gray-700">
+          <div className="relative rounded-2xl overflow-hidden border border-gray-700 shadow-xl">
             <div className="aspect-square w-full relative">
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
@@ -229,9 +231,9 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
               />
               
               {isUploading && (
-                <div className="absolute inset-0 bg-gray-900/50 flex flex-col items-center justify-center text-white">
-                  <Loader2 className="h-10 w-10 animate-spin mb-2" />
-                  <p>Uploading...</p>
+                <div className="absolute inset-0 bg-gray-900/70 flex flex-col items-center justify-center text-white">
+                  <Loader2 className="h-12 w-12 animate-spin mb-3" />
+                  <p className="text-lg font-medium">Uploading...</p>
                 </div>
               )}
             </div>
@@ -240,7 +242,7 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
           {showUploadButton && selectedImage && !isUploading && (
             <button
               onClick={() => handleUpload(selectedImage)}
-              className="mt-3 w-full bg-blue-600 hover:bg-blue-700 text-white py-2 px-4 rounded-md font-medium transition-colors disabled:bg-blue-400 disabled:cursor-not-allowed flex items-center justify-center"
+              className="mt-5 w-full bg-gradient-to-r from-primary-600 to-emerald-600 hover:from-primary-500 hover:to-emerald-500 text-white py-3 px-6 rounded-xl font-medium transition-all shadow-lg transform hover:-translate-y-0.5 flex items-center justify-center"
               disabled={!isAuthenticatedUser || isUploading}
             >
               <Upload className="h-5 w-5 mr-2" />
@@ -251,8 +253,8 @@ const ImageUploader: React.FC<ImageUploaderProps> = ({
       )}
 
       {error && (
-        <div className="mt-3 p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
-          <p className="text-sm text-red-600 dark:text-red-400">{error}</p>
+        <div className="mt-4 p-4 bg-red-900/30 border border-red-700 rounded-xl">
+          <p className="text-red-300">{error}</p>
         </div>
       )}
     </div>

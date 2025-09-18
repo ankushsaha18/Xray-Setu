@@ -32,15 +32,8 @@ const nextConfig = {
       exclude: ['error', 'warn'],
     } : false,
   },
-  // Enable font optimization
-  optimizeFonts: true,
   // Cache optimization
-  experimental: {
-    // Enable app directory features
-    appDir: true,
-    // Optimize server components
-    serverComponentsExternalPackages: [],
-  },
+  serverExternalPackages: [],
   // Static generation optimization
   staticPageGenerationTimeout: 120,
   // Enable advanced page optimization
