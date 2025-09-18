@@ -186,8 +186,8 @@ const RegisterForm = () => {
                 onChange={handleChange}
                 className={`block w-full pl-10 pr-3 py-3 border ${
                   hasFieldError('username') ? 'border-red-500' : 
-                  displayError ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                  displayError ? 'border-red-300' : 'border-primary-300'
+                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:border-primary-600 dark:text-white`}
                 aria-invalid={hasFieldError('username')}
                 aria-describedby={hasFieldError('username') ? "username-error" : undefined}
               />
@@ -220,8 +220,8 @@ const RegisterForm = () => {
                 onChange={handleChange}
                 className={`block w-full pl-10 pr-3 py-3 border ${
                   hasFieldError('email') ? 'border-red-500' : 
-                  displayError ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                  displayError ? 'border-red-300' : 'border-primary-300'
+                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:border-primary-600 dark:text-white`}
               />
             </div>
             {hasFieldError('email') && (
@@ -252,8 +252,8 @@ const RegisterForm = () => {
                 onChange={handleChange}
                 className={`block w-full pl-10 pr-3 py-3 border ${
                   hasFieldError('password') ? 'border-red-500' : 
-                  displayError ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                  displayError ? 'border-red-300' : 'border-primary-300'
+                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:border-primary-600 dark:text-white`}
               />
             </div>
             {hasFieldError('password') && (
@@ -283,8 +283,8 @@ const RegisterForm = () => {
                 value={formData.confirmPassword}
                 onChange={handleChange}
                 className={`block w-full pl-10 pr-3 py-3 border ${
-                  displayError ? 'border-red-300' : 'border-gray-300'
-                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent dark:bg-gray-700 dark:border-gray-600 dark:text-white`}
+                  displayError ? 'border-red-300' : 'border-primary-300'
+                } rounded-md shadow-sm placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:border-transparent dark:bg-gray-700 dark:border-primary-600 dark:text-white`}
               />
             </div>
           </div>
@@ -306,7 +306,7 @@ const RegisterForm = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-white bg-blue-600 hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-blue-400 transition-colors"
+            className="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-70 transition-all"
           >
             {isLoading ? (
               <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">

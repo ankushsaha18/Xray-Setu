@@ -43,6 +43,10 @@ class DeepgramTranscriber:
         url = self.endpoint
         if language:
             url = url + f'&language={language}'
+        
+        # Debug: Print the URL being used
+        print(f"Deepgram URL: {url}")
+        print(f"Language parameter: {language}")
 
         max_retries = 3
         backoff = 2
@@ -50,6 +54,7 @@ class DeepgramTranscriber:
         for attempt in range(max_retries + 1):
             try:
                 resp = requests.post(url, headers=headers, data=file_bytes, timeout=90)
+                print(f"Deepgram response status: {resp.status_code}")
                 if resp.status_code in (429, 502, 503, 504):
                     if attempt < max_retries:
                         # honor Retry-After when present
@@ -60,6 +65,7 @@ class DeepgramTranscriber:
                         continue
                 resp.raise_for_status()
                 data = resp.json()
+                print(f"Deepgram response data: {data}")
                 # Deepgram returns transcript in data['results']['channels'][0]['alternatives'][0]['transcript']
                 results = data.get('results', {})
                 channels = results.get('channels', [])
@@ -68,6 +74,7 @@ class DeepgramTranscriber:
                 return ''
             except requests.RequestException as e:
                 last_error = e
+                print(f"Deepgram request error: {e}")
                 if attempt < max_retries:
                     time.sleep(backoff)
                     backoff *= 2

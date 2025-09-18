@@ -3,14 +3,14 @@ from typing import Dict, List
 
 
 SYMPTOM_LEXICON = {
-    'cough': ['cough', 'coughing'],
-    'fever': ['fever', 'febrile', 'temperature is high'],
-    'chest_pain': ['chest pain', 'pain in chest', 'tight chest', 'chest tightness'],
-    'breathlessness': ['shortness of breath', 'breathless', 'difficulty breathing', 'dyspnea', 'dyspnoea'],
-    'headache': ['headache', 'head pain', 'migraine'],
-    'sore_throat': ['sore throat', 'throat pain', 'throat hurts'],
-    'fatigue': ['fatigue', 'tired', 'weakness'],
-    'loss_of_smell': ['loss of smell', 'can’t smell', 'cant smell', 'anosmia'],
+    'cough': ['cough', 'coughing', 'khashi', 'sardi'],
+    'fever': ['fever', 'febrile', 'temperature is high', 'jukam', 'buqar'],
+    'chest_pain': ['chest pain', 'pain in chest', 'tight chest', 'chest tightness', 'seena dard'],
+    'breathlessness': ['shortness of breath', 'breathless', 'difficulty breathing', 'dyspnea', 'dyspnoea', 'sans lai', 'dimaagi'],
+    'headache': ['headache', 'head pain', 'migraine', 'sar dard'],
+    'sore_throat': ['sore throat', 'throat pain', 'throat hurts', 'gala dard'],
+    'fatigue': ['fatigue', 'tired', 'weakness', 'thakan', 'kamzori'],
+    'loss_of_smell': ['loss of smell', 'can’t smell', 'cant smell', 'anosmia', 'ghrana khamoshi'],
 }
 
 
@@ -19,6 +19,12 @@ NEGATION_PATTERNS = [
     r"not\s+{term}",
     r"denies\s+{term}",
     r"without\s+{term}",
+    r"nahi\s+{term}",
+    r"nahin\s+{term}",
+    r"do not have\s+{term}",
+    r"do not\s+{term}",
+    r"don't have\s+{term}",
+    r"don't\s+{term}",
 ]
 
 
@@ -41,7 +47,7 @@ def extract_symptoms(transcript: str) -> Dict[str, bool]:
             pattern = re.escape(variant)
             if re.search(pattern, text):
                 present = True
-                # Check negation windows (simple heuristic: negation within 3 tokens before term)
+                # Check negation windows (simple heuristic: negation within 10 tokens before term)
                 for neg_tpl in NEGATION_PATTERNS:
                     neg_regex = neg_tpl.format(term=pattern)
                     if re.search(neg_regex, text):
@@ -65,5 +71,3 @@ def to_vitals_flags(symptoms: Dict[str, bool]) -> Dict[str, bool]:
         'chest_pain': symptoms.get('chest_pain', False),
         'fever_symptom': symptoms.get('fever', False),
     }
-
-

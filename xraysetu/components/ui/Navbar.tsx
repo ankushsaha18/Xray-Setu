@@ -39,7 +39,7 @@ const Navbar = () => {
                   height={50}
                   className="rounded-full shadow-md"
                 />
-                <span className="font-extrabold text-2xl tracking-wide text-blue-300 dark:text-blue-300">Xray Setu</span>
+                <span className="font-extrabold text-2xl tracking-wide text-primary-400 dark:text-primary-300">Xray Setu</span>
               </Link>
             </div>
 
@@ -54,14 +54,14 @@ const Navbar = () => {
                       className={classNames(
                         'relative text-lg font-medium transition-colors duration-300 group',
                         {
-                          'text-blue-400 dark:text-blue-400': isActiveLink(link.href),
-                          'text-gray-300 hover:text-blue-400 dark:text-gray-300 dark:hover:text-blue-400': !isActiveLink(link.href),
+                          'text-primary-400 dark:text-primary-300': isActiveLink(link.href),
+                          'text-gray-300 hover:text-primary-400 dark:text-gray-300 dark:hover:text-primary-300': !isActiveLink(link.href),
                         }
                       )}
                     >
                       {link.name}
                       <span className={classNames(
-                        'absolute bottom-0 left-0 w-full h-0.5 bg-blue-500 transition-transform duration-300 transform scale-x-0 group-hover:scale-x-100',
+                        'absolute bottom-0 left-0 w-full h-0.5 bg-primary-500 transition-transform duration-300 transform scale-x-0 group-hover:scale-x-100',
                         {
                           'scale-x-100': isActiveLink(link.href),
                         }
@@ -89,7 +89,7 @@ const Navbar = () => {
             ) : (
               <Link
                 href="/login"
-                className="bg-blue-600 hover:bg-blue-700 text-white font-semibold py-2 px-6 rounded-full shadow-md transition-all duration-300 transform hover:scale-105 active:scale-100" // Added active:scale-100 for subtle press effect
+                className="bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 text-white font-semibold py-2 px-6 rounded-full shadow-md transition-all duration-300 transform hover:scale-105 active:scale-100"
               >
                 Login
               </Link>
@@ -128,7 +128,7 @@ const Navbar = () => {
                 className={classNames(
                   'block px-3 py-2 rounded-md text-base font-medium transition-colors duration-300',
                   {
-                    'bg-blue-900 text-blue-300 dark:bg-blue-900 dark:text-blue-200': isActiveLink(link.href),
+                    'bg-primary-900 text-primary-300 dark:bg-primary-900 dark:text-primary-200': isActiveLink(link.href),
                     'text-gray-300 hover:bg-gray-800 dark:text-gray-300 dark:hover:bg-gray-700': !isActiveLink(link.href),
                   }
                 )}

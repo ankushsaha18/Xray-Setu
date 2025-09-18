@@ -4,6 +4,7 @@ import os
 from dotenv import load_dotenv
 from urllib.parse import urlparse
 
+# Load environment variables from .env file
 load_dotenv()
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.

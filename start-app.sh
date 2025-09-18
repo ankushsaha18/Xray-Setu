@@ -24,6 +24,13 @@ sleep 3
 # Start frontend server
 echo "Starting frontend server..."
 cd ../../xraysetu
+
+# Check if node_modules exists, if not install dependencies
+if [ ! -d "node_modules" ]; then
+    echo "Installing frontend dependencies..."
+    npm install
+fi
+
 npm run dev > /tmp/cdss-frontend.log 2>&1 &
 FRONTEND_PID=$!
 

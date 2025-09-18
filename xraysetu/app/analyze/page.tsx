@@ -23,6 +23,7 @@ export default function AnalyzePage() {
     2: false
   });
   const [transcript, setTranscript] = useState<string>("");
+  const [selectedLanguage, setSelectedLanguage] = useState<string>("en");
   const router = useRouter();
 
   // Handle image selection
@@ -232,7 +233,22 @@ export default function AnalyzePage() {
             <div className="animate-fadeIn">
               <StepTitle step={3} />
               <p className="text-gray-600 dark:text-gray-400 mb-6">Record a short voice note describing symptoms like cough, fever, or breathlessness.</p>
+              
+              {/* Language Selection */}
+              <div className="mb-4">
+                <label className="block text-sm font-medium mb-2">Select Language</label>
+                <select 
+                  className="w-full p-2 border rounded-md focus:ring-2 focus:ring-blue-500 focus:outline-none dark:bg-gray-700 dark:border-gray-600"
+                  defaultValue="en"
+                  onChange={(e) => setSelectedLanguage(e.target.value)}
+                >
+                  <option value="en">English</option>
+                  <option value="hi">Hindi (हिंदी)</option>
+                </select>
+              </div>
+              
               <VoiceRecorder
+                language={selectedLanguage}
                 onTranscribed={(text) => {
                   setTranscript(text);
                   setStepComplete(prev => ({...prev, 3: true}));

@@ -11,7 +11,7 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 5,
   userScalable: true,
-  themeColor: "#1E40AF",
+  themeColor: "#22c55e",
 }
 
 export const metadata: Metadata = {
@@ -89,8 +89,10 @@ export default function RootLayout({
         <link rel="preconnect" href="https://fonts.googleapis.com" />
         <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
         
-        {/* Removed duplicate favicon links since they are already defined in metadata */}
-        <meta name="theme-color" content="#1E40AF" />
+        {/* Font import */}
+        <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet" />
+        
+        <meta name="theme-color" content="#22c55e" />
       </head>
       <body className="flex flex-col min-h-screen bg-gray-900 text-gray-100">
         {/* Register service worker for PWA support */}

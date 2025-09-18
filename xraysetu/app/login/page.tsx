@@ -24,7 +24,7 @@ export default function LoginPage() {
     return (
       <div className="flex justify-center items-center min-h-screen">
         <div className="flex flex-col items-center">
-          <div className="h-10 w-10 text-blue-500">
+          <div className="h-10 w-10 text-primary-500">
             <svg
               xmlns="http://www.w3.org/2000/svg"
               width={24}
@@ -35,7 +35,7 @@ export default function LoginPage() {
               strokeWidth={2}
               strokeLinecap="round"
               strokeLinejoin="round"
-              className="h-10 w-10 text-blue-500 animate-spin"
+              className="h-10 w-10 text-primary-500 animate-spin"
               aria-hidden="true"
             >
               <path d="M21 12a9 9 0 1 1-6.219-8.56" />
@@ -57,7 +57,7 @@ export default function LoginPage() {
       {/* Background image - full screen with gradient overlay */}
       <div className="fixed inset-0 z-0">
         <Image
-          src="/background.jpeg"
+          src="/background.png"
           alt="Background"
           fill
           priority
@@ -84,7 +84,7 @@ export default function LoginPage() {
                 Xray Setu
               </h1>
             </div>
-            <p className="text-xl text-blue-200 mb-6">
+            <p className="text-xl text-primary-300 mb-6">
               Clinical Decision Support System
             </p>
             <p className="text-gray-200">
@@ -108,7 +108,7 @@ export default function LoginPage() {
             <div className="mt-6 text-center">
               <p className="text-sm text-gray-300">
                 Don't have an account?{" "}
-                <Link href="/register" className="text-blue-400 hover:underline font-medium">
+                <Link href="/register" className="text-primary-400 hover:underline font-medium">
                   Create an account
                 </Link>
               </p>
