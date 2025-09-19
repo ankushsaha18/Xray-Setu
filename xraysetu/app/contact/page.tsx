@@ -103,8 +103,6 @@ export default function ContactPage() {
                 <div>
                   <p className="font-semibold text-gray-900 dark:text-white">Location</p>
                   <p className="text-gray-600 dark:text-gray-400">
-                    Healthcare Innovation Center<br />
-                    123 Medical Drive<br />
                     Bhubaneswar, Odisha, India
                   </p>
                 </div>
@@ -115,7 +113,7 @@ export default function ContactPage() {
                   <p className="font-semibold text-gray-900 dark:text-white">Office Hours</p>
                   <p className="text-gray-600 dark:text-gray-400">
                     Monday - Friday: 9:00 AM - 5:00 PM<br />
-                    Saturday - Sunday: Closed
+                    Sunday: Closed
                   </p>
                 </div>
               </li>
