@@ -5,7 +5,7 @@ import Link from 'next/link';
 import Image from 'next/image';
 import { usePathname } from 'next/navigation';
 import classNames from 'classnames';
-import { Menu, X, LogOut } from 'lucide-react';
+import { Menu, X, LogOut, Stethoscope, Heart } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 
 const Navbar = () => {
@@ -94,16 +94,23 @@ const Navbar = () => {
                 </button>
               </>
             ) : (
-              <Link
-                href="/login"
-                className="relative inline-flex items-center px-6 py-2.5 bg-gradient-to-r from-primary-600 to-emerald-600 hover:from-primary-500 hover:to-emerald-500 text-white font-semibold rounded-full shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50 overflow-hidden group"
-              >
-                <span className="absolute inset-0 bg-gradient-to-r from-primary-700 to-emerald-700 opacity-0 group-hover:opacity-100 transition-opacity duration-300"></span>
-                <span className="relative flex items-center">
-                  Login
-                  <span className="ml-2 transition-transform duration-300 group-hover:translate-x-1">→</span>
-                </span>
-              </Link>
+              <div className="flex items-center space-x-3">
+                <Link
+                  href="/login"
+                  className="relative inline-flex items-center px-4 py-2 bg-gradient-to-r from-primary-600 to-emerald-600 hover:from-primary-500 hover:to-emerald-500 text-white font-semibold rounded-full shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-opacity-50 overflow-hidden group"
+                >
+                  <Heart className="h-4 w-4 mr-2" />
+                  <span className="relative">Patient Login</span>
+                </Link>
+                
+                <Link
+                  href="/nurse-login"
+                  className="relative inline-flex items-center px-4 py-2 bg-gradient-to-r from-blue-600 to-indigo-600 hover:from-blue-500 hover:to-indigo-500 text-white font-semibold rounded-full shadow-lg transition-all duration-300 transform hover:-translate-y-0.5 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-opacity-50 overflow-hidden group"
+                >
+                  <Stethoscope className="h-4 w-4 mr-2" />
+                  <span className="relative">Nurse Login</span>
+                </Link>
+              </div>
             )}
           </div>
 
@@ -162,13 +169,25 @@ const Navbar = () => {
               <span>Logout</span>
             </button>
           ) : (
-            <Link
-              href="/login"
-              className="block px-3 py-3 rounded-lg text-base font-medium text-gray-300 hover:bg-gray-800/50 transition-colors"
-              onClick={() => setMobileMenuOpen(false)}
-            >
-              Login
-            </Link>
+            <div className="space-y-3 pt-3 border-t border-gray-800">
+              <Link
+                href="/login"
+                className="flex items-center px-3 py-3 rounded-lg text-base font-medium text-gray-300 hover:bg-gray-800/50 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Heart className="h-5 w-5 mr-3 text-primary-400" />
+                Patient Login
+              </Link>
+              
+              <Link
+                href="/nurse-login"
+                className="flex items-center px-3 py-3 rounded-lg text-base font-medium text-gray-300 hover:bg-gray-800/50 transition-colors"
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Stethoscope className="h-5 w-5 mr-3 text-blue-400" />
+                Nurse Login
+              </Link>
+            </div>
           )}
         </div>
       </div>

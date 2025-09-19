@@ -141,15 +141,16 @@ export interface FinalDiagnosisResult {
 
 // Patient vitals types
 export interface PatientVitals {
-  temperature: number;  // in Celsius
-  systolicBP: number;   // mmHg
-  diastolicBP: number;  // mmHg
-  heartRate: number;    // bpm
-  birthdate: string;    // YYYY-MM-DD format
-  gender: string;       // 'male', 'female'
-  hasCough: boolean;
-  hasHeadaches: boolean;
-  canSmellTaste: boolean;
+  patientName?: string;  // Optional field for nurse entries
+  temperature?: number;  // in Celsius (optional for patients)
+  systolicBP?: number;   // mmHg (optional for patients)
+  diastolicBP?: number;  // mmHg (optional for patients)
+  heartRate?: number;    // bpm (optional for patients)
+  birthdate: string;    // YYYY-MM-DD format (required)
+  gender: string;       // 'male', 'female' (required)
+  hasCough: boolean;    // required
+  hasHeadaches: boolean; // required
+  canSmellTaste: boolean; // required
 }
 
 export interface TreatmentSuggestion {
@@ -175,4 +176,3 @@ export interface PredictionResponse {
   }[];
   heatmap?: string; // base64 encoded image
 }
-

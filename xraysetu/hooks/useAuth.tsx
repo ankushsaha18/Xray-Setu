@@ -12,6 +12,7 @@ interface User {
   username?: string;
   email?: string;
   name?: string;
+  role?: string; // Add role field
 }
 
 interface AuthTokens {
@@ -23,11 +24,12 @@ interface AuthContextType {
   user: User | null;
   loading: boolean;
   login: (username: string, password: string) => Promise<boolean>;
-  register: (username: string, email: string, password: string) => Promise<boolean>;
+  register: (username: string, email: string, password: string, role?: string) => Promise<boolean>; // Add role parameter
   logout: () => void;
   isLoading: boolean;
   isAuthenticatedUser: boolean;
   error: string | null;
+  setError: (error: string | null) => void; // Add setError to context type
 }
 
 const AuthContext = createContext<AuthContextType | null>(null);
@@ -203,8 +205,8 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
           }));
         }
 
-        localStorage.setItem('userData', JSON.stringify(data));
-        setUser(data);
+        localStorage.setItem('userData', JSON.stringify(data.user || data));
+        setUser(data.user || data);
         return true;
       } else {
         setError('Login failed - no data returned');
@@ -219,7 +221,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
-  const register = async (username: string, email: string, password: string): Promise<boolean> => {
+  const register = async (username: string, email: string, password: string, role: string = 'patient'): Promise<boolean> => {
     setLoading(true);
     setError(null);
 
@@ -227,11 +229,15 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       const useMockAuth = await isDemoMode();      
       if (useMockAuth) {
         try {
+          // Include role in mock registration
           const mockUser = await mockRegister(username, email, password);
+          
+          // Add role to mock user
+          const mockUserWithRole = { ...mockUser, role };
 
           if (mockUser) {
-            localStorage.setItem('userData', JSON.stringify(mockUser));
-            setUser(mockUser);
+            localStorage.setItem('userData', JSON.stringify(mockUserWithRole));
+            setUser(mockUserWithRole);
             setUsingMockAuth(true);
             console.log("User registered successfully (mock mode).");
             
@@ -258,12 +264,16 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         }
       }
 
+      // Include role in the API request
       const response = await apiRequest<any>({
         endpoint: '/auth/signup/',
         method: 'POST',
-        body: { username, email, password },
+        body: { username, email, password, role },
         requiresAuth: false
-      });      if (response.error) {      // Check if this is a validation error with detailed field errors
+      });
+      
+      if (response.error) {
+        // Check if this is a validation error with detailed field errors
         if (isValidationError(response.error)) {
           // Format field errors into a readable message
           const fieldErrors = Object.entries(response.error.fields)
@@ -333,6 +343,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
         isLoading: loading,
         isAuthenticatedUser: !!user,
         error,
+        setError, // Expose setError function
       }}
     >
       {children}

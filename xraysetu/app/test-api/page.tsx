@@ -1,11 +1,23 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
+
+interface TestResult {
+  options: {
+    status: number;
+    statusText: string;
+  };
+  login: {
+    status: number;
+    statusText: string;
+    data: any;
+  };
+}
 
 export default function TestApiPage() {
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<TestResult | null>(null);
   const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
+  const [error, setError] = useState<string | null>(null);
 
   const testApiConnection = async () => {
     setLoading(true);
@@ -55,7 +67,7 @@ export default function TestApiPage() {
           data: data
         }
       });
-    } catch (err) {
+    } catch (err: any) {
       console.error('API test error:', err);
       setError(err.message);
     } finally {

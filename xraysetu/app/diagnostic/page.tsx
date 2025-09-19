@@ -8,9 +8,9 @@ export default function DiagnosticPage() {
     apiUrl: '',
     isDemoMode: false,
     backendAccessible: false,
-    backendError: null,
+    backendError: null as string | null,
     corsWorking: false,
-    corsError: null,
+    corsError: null as string | null,
   });
 
   useEffect(() => {
@@ -44,11 +44,11 @@ export default function DiagnosticPage() {
           backendAccessible: response.ok,
           backendError: response.ok ? null : `HTTP ${response.status}: ${response.statusText}`
         }));
-      } catch (error) {
+      } catch (error: any) {
         setDiagnostics(prev => ({
           ...prev,
           backendAccessible: false,
-          backendError: error.message
+          backendError: error.message || 'Unknown error'
         }));
       }
     };
@@ -72,11 +72,11 @@ export default function DiagnosticPage() {
           corsWorking,
           corsError: corsWorking ? null : `HTTP ${response.status}: ${response.statusText}`
         }));
-      } catch (error) {
+      } catch (error: any) {
         setDiagnostics(prev => ({
           ...prev,
           corsWorking: false,
-          corsError: error.message
+          corsError: error.message || 'Unknown error'
         }));
       }
     };

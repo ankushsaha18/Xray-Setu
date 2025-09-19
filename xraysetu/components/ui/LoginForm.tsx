@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, LogIn, CheckCircle } from 'lucide-react';
+import { User, LogIn, CheckCircle, Stethoscope, Heart } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 
 const LoginForm = () => {
@@ -12,7 +12,7 @@ const LoginForm = () => {
   const [registrationSuccess, setRegistrationSuccess] = useState(false);
   const [registeredEmail, setRegisteredEmail] = useState('');
   const router = useRouter();
-  const { login, error } = useAuth();
+  const { login, error, user } = useAuth();
 
   // Check for registration success message in session storage
   useEffect(() => {
@@ -44,6 +44,13 @@ const LoginForm = () => {
     }
   }, []);
 
+  // Redirect nurses to their dashboard after login
+  useEffect(() => {
+    if (user && user.role === 'nurse') {
+      router.push('/nurse-dashboard');
+    }
+  }, [user, router]);
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsLoading(true);
@@ -52,7 +59,11 @@ const LoginForm = () => {
       const success = await login(username, password);
       
       if (success) {
-        router.push('/analyze');
+        // The redirect for nurses will be handled by the useEffect above
+        // For patients, we'll redirect to analyze page
+        if (user?.role !== 'nurse') {
+          router.push('/analyze');
+        }
       }
     } catch (err) {
       console.error('Login error:', err);
@@ -78,6 +89,20 @@ const LoginForm = () => {
       )}
       
       <form onSubmit={handleSubmit} className="space-y-6">
+        <div className="text-center mb-8">
+          <div className="flex justify-center mb-4">
+            <div className="p-3 rounded-full bg-gradient-to-r from-primary-500 to-emerald-500 shadow-lg">
+              <Heart className="h-8 w-8 text-white" />
+            </div>
+          </div>
+          <h2 className="text-2xl font-bold text-white mb-2">
+            Xray Setu Login
+          </h2>
+          <p className="text-gray-400">
+            Sign in to access your medical analysis and health insights
+          </p>
+        </div>
+
         <div>
           <div className="mb-1">
             <label 
@@ -144,7 +169,7 @@ const LoginForm = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-70 transition-all"
+            className="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-white bg-gradient-to-r from-primary-500 to-emerald-500 hover:from-primary-600 hover:to-emerald-600 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-70 transition-all"
           >
             {isLoading ? (
               <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -154,7 +179,7 @@ const LoginForm = () => {
             ) : (
               <LogIn className="h-5 w-5 mr-2" />
             )}
-            {isLoading ? 'Logging in...' : 'Sign in'}
+            {isLoading ? 'Signing in...' : 'Sign in'}
           </button>
         </div>
       </form>

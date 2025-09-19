@@ -17,7 +17,10 @@ class WhisperTranscriber:
         self.model = os.getenv('WHISPER_MODEL', 'whisper-1')
 
     def is_configured(self) -> bool:
-        return bool(self.api_key)
+        # Check if API key exists and is not a placeholder
+        return bool(self.api_key and 
+                   self.api_key.strip() and 
+                   self.api_key != 'your-openai-api-key-here')
 
     def transcribe_file(self, file_name: str, file_bytes: bytes, language: str | None = None) -> str:
         if not self.is_configured():
@@ -44,12 +47,19 @@ class WhisperTranscriber:
         for attempt in range(max_retries + 1):
             try:
                 response = requests.post(self.endpoint, headers=headers, data=data, files=files, timeout=90)
+                if response.status_code == 401:
+                    raise RuntimeError('Unauthorized: Invalid or missing OpenAI API key')
                 if response.status_code == 429:
                     # Respect Retry-After if present
                     retry_after = response.headers.get('Retry-After')
                     wait = int(retry_after) if retry_after and retry_after.isdigit() else backoff_seconds
                     if attempt < max_retries:
                         time.sleep(wait)
+                        backoff_seconds *= 2
+                        continue
+                elif response.status_code in (502, 503, 504):
+                    if attempt < max_retries:
+                        time.sleep(backoff_seconds)
                         backoff_seconds *= 2
                         continue
                 response.raise_for_status()
@@ -75,5 +85,3 @@ class WhisperTranscriber:
 
         # If we reach here, retries failed
         raise RuntimeError(f"Transcription failed after retries: {last_error}")
-
-

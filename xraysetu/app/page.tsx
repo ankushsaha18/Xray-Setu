@@ -26,14 +26,26 @@ const FeatureCard: React.FC<FeatureCardProps> = ({ title, description, icon }) =
 );
 
 export default function Home() {
-  const { isAuthenticatedUser } = useAuth();
+  const { isAuthenticatedUser, user } = useAuth();
   const [mounted, setMounted] = useState(false);
 
   useEffect(() => {
     setMounted(true);
   }, []);
 
+  // Redirect nurses to their dashboard
+  useEffect(() => {
+    if (isAuthenticatedUser && user?.role === 'nurse') {
+      window.location.href = '/nurse-dashboard';
+    }
+  }, [isAuthenticatedUser, user]);
+
   if (!mounted) {
+    return null;
+  }
+
+  // If user is a nurse, don't show the main page content
+  if (isAuthenticatedUser && user?.role === 'nurse') {
     return null;
   }
 

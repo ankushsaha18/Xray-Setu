@@ -28,6 +28,16 @@ export default function ResultPage() {
   // Load results from sessionStorage on mount
   useEffect(() => {
     try {
+      // Check if we're viewing a patient's report directly from history
+      const selectedPatient = sessionStorage.getItem('selectedPatient');
+      if (selectedPatient) {
+        // This is a direct view from patient history
+        const patient = JSON.parse(selectedPatient);
+        // Set a mock result or fetch actual patient data if needed
+        // For now, we'll just show a message that this is historical data
+        console.log('Viewing historical patient data:', patient);
+      }
+      
       const storedResult = sessionStorage.getItem('xrayResult');
       const storedImageUrl = sessionStorage.getItem('originalImageUrl');
       

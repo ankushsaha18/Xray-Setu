@@ -5,10 +5,10 @@ import { useState } from 'react';
 export default function TestLoginPage() {
   const [username, setUsername] = useState('testuser');
   const [password, setPassword] = useState('testpass123');
-  const [result, setResult] = useState(null);
+  const [result, setResult] = useState<any>(null);
   const [loading, setLoading] = useState(false);
 
-  const handleTestLogin = async (e) => {
+  const handleTestLogin = async (e: React.FormEvent) => {
     e.preventDefault();
     setLoading(true);
     setResult(null);
@@ -33,7 +33,7 @@ export default function TestLoginPage() {
         data: data,
         success: response.ok,
       });
-    } catch (error) {
+    } catch (error: any) {
       console.error('Login error:', error);
       setResult({
         error: error.message,

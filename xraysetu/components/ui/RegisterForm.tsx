@@ -2,29 +2,40 @@
 
 import { useState, useMemo, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
-import { User, Mail, Key, LogIn } from 'lucide-react';
+import { User, Mail, Key, LogIn, Stethoscope, UserCircle, Heart } from 'lucide-react';
 import useAuth from '@/hooks/useAuth';
 
-const RegisterForm = () => {
+const RegisterForm = ({ userType = 'patient' }: { userType?: 'patient' | 'nurse' }) => {
   const [formData, setFormData] = useState({
     username: '',
     email: '',
     password: '',
     confirmPassword: '',
+    role: userType, // Default to patient or nurse based on prop
   });
   const [isLoading, setIsLoading] = useState(false);
   const [validationError, setValidationError] = useState('');
+  const [apiError, setApiError] = useState<string | null>(null); // Local state for API errors
   // Field-specific error messages
   const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const router = useRouter();
-  const { register, error } = useAuth();
+  const { register, error, setError } = useAuth(); // Now setError is available
 
-  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+  // Update role when userType prop changes
+  useEffect(() => {
+    setFormData(prev => ({
+      ...prev,
+      role: userType
+    }));
+  }, [userType]);
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
       [e.target.name]: e.target.value,
     });
     setValidationError('');
+    setApiError(null); // Clear API error when user types
     
     // Clear field-specific error when user types
     if (fieldErrors[e.target.name]) {
@@ -39,6 +50,7 @@ const RegisterForm = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError('');
+    setApiError(null);
     setFieldErrors({});
     
     // Validate form inputs
@@ -60,7 +72,8 @@ const RegisterForm = () => {
     setIsLoading(true);
     
     try {
-      const success = await register(formData.username, formData.email, formData.password);
+      // Use the updated register function that includes role
+      const success = await register(formData.username, formData.email, formData.password, formData.role);
       
       // If registration is successful, the router will redirect in useAuth.tsx
       // If not, we'll get errors in the error state from useAuth
@@ -69,7 +82,9 @@ const RegisterForm = () => {
     } finally {
       setIsLoading(false);
     }
-  };  // Parse API error message which might contain field-specific errors
+  };
+
+  // Parse API error message which might contain field-specific errors
   const parseApiError = (errorMessage: string | null): string | undefined => {
     if (!errorMessage) return undefined;
     
@@ -90,6 +105,7 @@ const RegisterForm = () => {
         
         if (Object.keys(fieldErrorsMap).length) {
           // Update field errors but don't trigger a re-render in the parsing function
+          setFieldErrors(fieldErrorsMap);
           return mainMessage || 'Validation failed';
         }
       }
@@ -110,6 +126,37 @@ const RegisterForm = () => {
   const [displayError, parsedFieldErrors] = useMemo(() => {
     if (validationError) {
       return [validationError, {}];
+    }
+    
+    if (apiError) {
+      try {
+        // Process field-specific errors
+        let newFieldErrors: Record<string, string> = {};
+        
+        // First check for field-specific errors in the format "field: error message"
+        if (apiError.includes('\n')) {
+          const lines = apiError.split('\n');
+          
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+            const [field, ...messageParts] = line.split(':');
+            if (messageParts.length && field) {
+              newFieldErrors[field.trim()] = messageParts.join(':').trim();
+            }
+          }
+        }
+        
+        // Special case for username exists
+        if (apiError.toLowerCase().includes('username') && 
+            apiError.toLowerCase().includes('exists')) {
+          newFieldErrors.username = 'A user with that username already exists.';
+        }
+        
+        return [parseApiError(apiError), newFieldErrors];
+      } catch (e) {
+        console.error('Error parsing API error:', e);
+        return [apiError, {}];
+      }
     }
     
     if (error) {
@@ -144,7 +191,7 @@ const RegisterForm = () => {
     }
     
     return [undefined, {}];
-  }, [validationError, error]);
+  }, [validationError, apiError, error]);
     // Apply parsed field errors
   useEffect(() => {
     if (Object.keys(parsedFieldErrors).length > 0) {
@@ -166,7 +213,8 @@ const RegisterForm = () => {
     <div className="w-full max-w-md">
       <form onSubmit={handleSubmit} className="space-y-5">
         {/* Username Field */}
-        <div>          <div className="mb-1">
+        <div>
+          <div className="mb-1">
             <label 
               htmlFor="username" 
               className="block text-sm font-medium text-gray-700 dark:text-gray-300 mb-1"
@@ -230,6 +278,9 @@ const RegisterForm = () => {
           </div>
         </div>
 
+        {/* Hidden Role Field */}
+        <input type="hidden" name="role" value={formData.role} />
+
         {/* Password Field */}
         <div>
           <div className="mb-1">
@@ -288,7 +339,9 @@ const RegisterForm = () => {
               />
             </div>
           </div>
-        </div>        {/* Display general errors or field-specific error summary */}
+        </div>
+
+        {/* Display general errors or field-specific error summary */}
         {displayError && (
           <div className="p-3 bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded-md">
             <p className="text-sm font-medium text-red-600 dark:text-red-400">{displayError}</p>
@@ -306,7 +359,11 @@ const RegisterForm = () => {
           <button
             type="submit"
             disabled={isLoading}
-            className="group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-white bg-gradient-to-r from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 disabled:opacity-70 transition-all"
+            className={`group relative w-full flex justify-center py-3 px-4 border border-transparent rounded-md shadow-sm text-white bg-gradient-to-r ${
+              userType === 'nurse' 
+                ? 'from-blue-500 to-indigo-600 hover:from-blue-600 hover:to-indigo-700 focus:ring-blue-500' 
+                : 'from-primary-500 to-primary-600 hover:from-primary-600 hover:to-primary-700 focus:ring-primary-500'
+            } focus:outline-none focus:ring-2 focus:ring-offset-2 disabled:opacity-70 transition-all`}
           >
             {isLoading ? (
               <svg className="animate-spin -ml-1 mr-2 h-4 w-4 text-white" xmlns="http://www.w3.org/2000/svg" fill="none" viewBox="0 0 24 24">
@@ -316,7 +373,7 @@ const RegisterForm = () => {
             ) : (
               <LogIn className="h-5 w-5 mr-2" />
             )}
-            {isLoading ? 'Creating account...' : 'Create Account'}
+            {isLoading ? 'Creating account...' : `Create ${userType === 'nurse' ? 'Nurse' : 'Patient'} Account`}
           </button>
         </div>
       </form>

@@ -67,10 +67,10 @@ def upload_scan(request):
         try:
             # Required parameters with validation
             params = {
-                'systolic_pressure': int(request.data.get('systolicBP', 120)),
-                'diastolic_pressure': int(request.data.get('diastolicBP', 80)),
-                'temperature': float(request.data.get('temperature', 37.0)),
-                'heart_rate': int(request.data.get('heartRate', 75)),
+                'systolic_pressure': int(request.data.get('systolicBP')) if request.data.get('systolicBP') is not None else 120,
+                'diastolic_pressure': int(request.data.get('diastolicBP')) if request.data.get('diastolicBP') is not None else 80,
+                'temperature': float(request.data.get('temperature')) if request.data.get('temperature') is not None else 37.0,
+                'heart_rate': int(request.data.get('heartRate')) if request.data.get('heartRate') is not None else 75,
                 'has_cough': request.data.get('hasCough', 'false').lower() == 'true',
                 'has_headache': request.data.get('hasHeadaches', 'false').lower() == 'true',
                 'can_smell': request.data.get('canSmellTaste', 'true').lower() == 'true',
@@ -111,20 +111,76 @@ def transcribe_symptoms(request):
         audio_file = request.FILES['audio']
         # Select STT provider via env var
         provider = os.getenv('STT_PROVIDER', 'whisper').lower()
-        if provider == 'whisper':
+        language = request.data.get('language')
+        
+        # For Odia language (or), try different providers as fallbacks
+        # Neither Deepgram nor standard Whisper/Gemini support Odia directly
+        # We'll try to use fallback providers with language hints
+        if language == 'or':  # Odia language code
+            # Check if Deepgram is configured (it doesn't support Odia)
+            if provider == 'deepgram':
+                return Response({
+                    'error': 'Deepgram does not support Odia language',
+                    'suggestion': 'Please switch to Whisper (OPENAI_API_KEY) or Gemini (GOOGLE_API_KEY) for Odia language support'
+                }, status=status.HTTP_400_BAD_REQUEST)
+            
+            # Try Whisper first for Odia (with language hint)
             transcriber = WhisperTranscriber()
-        elif provider == 'gemini':
-            transcriber = GeminiTranscriber()
-        elif provider == 'deepgram':
-            transcriber = DeepgramTranscriber()
+            if not transcriber.is_configured():
+                # Fallback to Gemini if Whisper is not configured
+                transcriber = GeminiTranscriber()
+                if not transcriber.is_configured():
+                    # If no providers are configured, return error with suggestions
+                    return Response({
+                        'error': 'No STT provider configured for Odia language',
+                        'suggestion': 'Please configure either Whisper (OPENAI_API_KEY) or Gemini (GOOGLE_API_KEY) for Odia language support',
+                        'configured_providers': {
+                            'whisper_configured': False,
+                            'gemini_configured': False,
+                            'deepgram_configured': DeepgramTranscriber().is_configured()
+                        }
+                    }, status=status.HTTP_501_NOT_IMPLEMENTED)
         else:
-            return Response({'error': f'Unknown STT provider: {provider}'}, status=status.HTTP_400_BAD_REQUEST)
+            # For other languages, use the default provider selection
+            if provider == 'whisper':
+                transcriber = WhisperTranscriber()
+            elif provider == 'gemini':
+                transcriber = GeminiTranscriber()
+            elif provider == 'deepgram':
+                transcriber = DeepgramTranscriber()
+                # Check if language is supported by Deepgram
+                if language and not transcriber.is_language_supported(language):
+                    return Response({
+                        'error': f'Language "{language}" is not supported by the selected STT provider ({provider})',
+                        'supported_languages': sorted(list(transcriber.SUPPORTED_LANGUAGES)),
+                        'suggestion': 'Supported languages: English, Hindi, Spanish, French, German, etc. Deepgram does not support Odia.'
+                    }, status=status.HTTP_400_BAD_REQUEST)
+            else:
+                return Response({'error': f'Unknown STT provider: {provider}'}, status=status.HTTP_400_BAD_REQUEST)
+        
         transcript = ""
         if transcriber.is_configured():
             audio_file.seek(0)
-            transcript = transcriber.transcribe_file(audio_file.name, audio_file.read(), request.data.get('language'))
+            transcript = transcriber.transcribe_file(audio_file.name, audio_file.read(), language)
         else:
-            return Response({'error': 'Speech-to-text not configured on server'}, status=status.HTTP_501_NOT_IMPLEMENTED)
+            # Provide detailed error about what needs to be configured
+            if provider == 'whisper':
+                return Response({
+                    'error': 'Whisper STT is not configured',
+                    'suggestion': 'Please set OPENAI_API_KEY in your environment variables'
+                }, status=status.HTTP_501_NOT_IMPLEMENTED)
+            elif provider == 'gemini':
+                return Response({
+                    'error': 'Gemini STT is not configured',
+                    'suggestion': 'Please set GOOGLE_API_KEY in your environment variables'
+                }, status=status.HTTP_501_NOT_IMPLEMENTED)
+            elif provider == 'deepgram':
+                return Response({
+                    'error': 'Deepgram STT is not configured',
+                    'suggestion': 'Please set DEEPGRAM_API_KEY in your environment variables'
+                }, status=status.HTTP_501_NOT_IMPLEMENTED)
+            else:
+                return Response({'error': 'Speech-to-text not configured on server'}, status=status.HTTP_501_NOT_IMPLEMENTED)
 
         symptoms = extract_symptoms(transcript)
         return Response({
@@ -132,6 +188,14 @@ def transcribe_symptoms(request):
             'symptoms': symptoms
         }, status=status.HTTP_200_OK)
     except Exception as e:
+        # Log the full error for debugging
+        import traceback
+        error_details = str(e)
+        if "quota" in error_details.lower() or "429" in error_details:
+            return Response({
+                'error': 'API quota exceeded. Please try again later or switch to a different provider.',
+                'suggestion': 'The current provider has reached its usage limits. Consider switching to Deepgram which is now configured.'
+            }, status=status.HTTP_429_TOO_MANY_REQUESTS)
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
 
@@ -164,11 +228,11 @@ def multimodal_diagnosis(request):
             return Response({'error': 'Invalid birthdate format. Use YYYY-MM-DD or MM/DD/YYYY'}, status=status.HTTP_400_BAD_REQUEST)
         age = relativedelta(datetime.now(), birthdate).years
 
-        # Structured vitals
-        systolic = int(request.data.get('systolicBP', 120))
-        diastolic = int(request.data.get('diastolicBP', 80))
-        temperature = float(request.data.get('temperature', 37.0))
-        heart_rate = int(request.data.get('heartRate', 75))
+        # Structured vitals with default values for optional fields
+        systolic = int(request.data.get('systolicBP')) if request.data.get('systolicBP') is not None else 120
+        diastolic = int(request.data.get('diastolicBP')) if request.data.get('diastolicBP') is not None else 80
+        temperature = float(request.data.get('temperature')) if request.data.get('temperature') is not None else 37.0
+        heart_rate = int(request.data.get('heartRate')) if request.data.get('heartRate') is not None else 75
         gender = request.data.get('gender', 'female')
 
         # Symptom extraction: either user-provided transcript or server extracts from voice

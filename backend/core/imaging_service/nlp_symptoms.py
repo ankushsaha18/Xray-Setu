@@ -3,14 +3,14 @@ from typing import Dict, List
 
 
 SYMPTOM_LEXICON = {
-    'cough': ['cough', 'coughing', 'khashi', 'sardi'],
-    'fever': ['fever', 'febrile', 'temperature is high', 'jukam', 'buqar'],
-    'chest_pain': ['chest pain', 'pain in chest', 'tight chest', 'chest tightness', 'seena dard'],
-    'breathlessness': ['shortness of breath', 'breathless', 'difficulty breathing', 'dyspnea', 'dyspnoea', 'sans lai', 'dimaagi'],
-    'headache': ['headache', 'head pain', 'migraine', 'sar dard'],
-    'sore_throat': ['sore throat', 'throat pain', 'throat hurts', 'gala dard'],
-    'fatigue': ['fatigue', 'tired', 'weakness', 'thakan', 'kamzori'],
-    'loss_of_smell': ['loss of smell', 'can’t smell', 'cant smell', 'anosmia', 'ghrana khamoshi'],
+    'cough': ['cough', 'coughing', 'khashi', 'sardi', 'khansi', 'ଖାସିଛି', 'ଖାସି'],
+    'fever': ['fever', 'febrile', 'temperature is high', 'jukam', 'buqar', 'jwara', 'ଜ୍ୱର', 'ଜ୍ୱର ଅନୁଭବ'],
+    'chest_pain': ['chest pain', 'pain in chest', 'tight chest', 'chest tightness', 'seena dard', 'seena re dard', 'ସିନା ରେ ଯାତନା', 'ସିନା ଯାତନା'],
+    'breathlessness': ['shortness of breath', 'breathless', 'difficulty breathing', 'dyspnea', 'dyspnoea', 'sans lai', 'dimaagi', 'swasa kastha', 'ସ୍ୱାସ କଷ୍ଟ', 'ସ୍ୱାସ କଷ୍ଟ ଅନୁଭବ'],
+    'headache': ['headache', 'head pain', 'migraine', 'sar dard', 'munda re dard', 'ମୁଣ୍ଡା ରେ ଯାତନା', 'ମୁଣ୍ଡା ଯାତନା'],
+    'sore_throat': ['sore throat', 'throat pain', 'throat hurts', 'gala dard', 'kanthare dard', 'ଗଳା ରେ ଯାତନା', 'ଗଳା ଯାତନା'],
+    'fatigue': ['fatigue', 'tired', 'weakness', 'thakan', 'kamzori', 'klanta', 'କ୍ଲାନ୍ତି', 'ଶାରୀରିକ ଦୁର୍ବଳତା'],
+    'loss_of_smell': ['loss of smell', 'can’t smell', 'cant smell', 'anosmia', 'ghrana khamoshi', 'ghrana hara', 'ଘ୍ରାଣ ହରାଇଛି', 'ଘ୍ରାଣ ଶକ୍ତି ହରାଇଛି'],
 }
 
 
@@ -25,6 +25,8 @@ NEGATION_PATTERNS = [
     r"do not\s+{term}",
     r"don't have\s+{term}",
     r"don't\s+{term}",
+    r"nathi\s+{term}",
+    r"nehi\s+{term}",
 ]
 
 

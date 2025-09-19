@@ -109,14 +109,14 @@ export const generateMockAnalysisResult = (patientVitals?: PatientVitals): Analy
     const age = patientVitals.birthdate ? calculateAge(patientVitals.birthdate) : 45;
     
     // Higher temperature suggests infection
-    const hasHighTemperature = patientVitals.temperature && patientVitals.temperature > 38.0;
+    const hasHighTemperature = patientVitals.temperature !== undefined && patientVitals.temperature > 38.0;
     
     // Abnormal blood pressure
-    const hasHighBP = patientVitals.systolicBP && patientVitals.systolicBP > 140;
-    const hasLowBP = patientVitals.systolicBP && patientVitals.systolicBP < 90;
+    const hasHighBP = patientVitals.systolicBP !== undefined && patientVitals.systolicBP > 140;
+    const hasLowBP = patientVitals.systolicBP !== undefined && patientVitals.systolicBP < 90;
     
     // High heart rate
-    const hasTachycardia = patientVitals.heartRate && patientVitals.heartRate > 100;
+    const hasTachycardia = patientVitals.heartRate !== undefined && patientVitals.heartRate > 100;
     
     // Symptom checks
     const hasCough = patientVitals.hasCough;
@@ -141,7 +141,7 @@ export const generateMockAnalysisResult = (patientVitals?: PatientVitals): Analy
     else if (hasHighTemperature && hasCough) {
       primaryFinding = 'Pneumonia';
       secondaryFinding = Math.random() > 0.7 ? 'Pleural Effusion' : null;
-      severity = hasTachycardia || hasHighTemperature && patientVitals.temperature > 39.0 ? 'Moderate to Severe' : 'Moderate';
+      severity = hasTachycardia || (hasHighTemperature && patientVitals.temperature !== undefined && patientVitals.temperature > 39.0) ? 'Moderate to Severe' : 'Moderate';
       treatmentSuggestions = [
         'Antibiotics may be indicated',
         'Rest and hydration',
@@ -234,10 +234,10 @@ export const generateMockAnalysisResult = (patientVitals?: PatientVitals): Analy
     // Format vitals for display
     const ageText = patientVitals.birthdate ? `${calculateAge(patientVitals.birthdate)} years old` : 'unknown age';
     const genderText = patientVitals.gender || 'unspecified gender';
-    const temperatureText = patientVitals.temperature ? `${patientVitals.temperature}°C` : 'temperature not recorded';
-    const bpText = patientVitals.systolicBP && patientVitals.diastolicBP ? 
+    const temperatureText = patientVitals.temperature !== undefined ? `${patientVitals.temperature}°C` : 'temperature not recorded';
+    const bpText = patientVitals.systolicBP !== undefined && patientVitals.diastolicBP !== undefined ? 
       `blood pressure ${patientVitals.systolicBP}/${patientVitals.diastolicBP} mmHg` : 'blood pressure not recorded';
-    const hrText = patientVitals.heartRate ? `heart rate ${patientVitals.heartRate} bpm` : 'heart rate not recorded';
+    const hrText = patientVitals.heartRate !== undefined ? `heart rate ${patientVitals.heartRate} bpm` : 'heart rate not recorded';
     
     diagnosisText = `${genderText} patient, ${ageText}, presenting with ${temperatureText}, ${bpText}, and ${hrText}. `;
     

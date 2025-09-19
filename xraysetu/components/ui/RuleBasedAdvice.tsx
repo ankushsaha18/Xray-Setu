@@ -209,9 +209,9 @@ const RuleBasedAdvice: React.FC<RuleBasedAdviceProps> = ({ result, className = '
   if (result.vitals) {
     if (result.vitals.hasCough) vitalsSymptoms.cough = true;
     if (result.vitals.hasHeadaches) vitalsSymptoms.headache = true;
-    if (!result.vitals.canSmellTaste) vitalsSymptoms.loss_of_smell = true;
+    if (result.vitals.canSmellTaste !== undefined && !result.vitals.canSmellTaste) vitalsSymptoms.loss_of_smell = true;
     // Check for fever based on temperature (>37.5°C is generally considered fever)
-    if (result.vitals.temperature && result.vitals.temperature > 37.5) vitalsSymptoms.fever_symptom = true;
+    if (result.vitals.temperature !== undefined && result.vitals.temperature > 37.5) vitalsSymptoms.fever_symptom = true;
   }
   
   // Combine symptoms from both sources

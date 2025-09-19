@@ -1,4 +1,3 @@
-# Create your models here.
 from django.db import models
 from django.contrib.auth.models import AbstractUser
 from django.utils.translation import gettext_lazy as _
@@ -12,6 +11,13 @@ class CustomUser(AbstractUser):
     
     # Add any additional fields you need
     phone_number = models.CharField(max_length=15, blank=True)
+    
+    # Role field for distinguishing between patient and nurse
+    ROLE_CHOICES = [
+        ('patient', 'Patient'),
+        ('nurse', 'Nurse'),
+    ]
+    role = models.CharField(max_length=10, choices=ROLE_CHOICES, default='patient')
     
     def __str__(self):
         return self.username

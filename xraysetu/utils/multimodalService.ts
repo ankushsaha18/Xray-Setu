@@ -24,10 +24,10 @@ export async function multimodalDiagnose(params: { image?: File; vitals: Patient
   const v = params.vitals;
   if (v.birthdate) form.append('birthdate', v.birthdate);
   if (v.gender) form.append('gender', v.gender);
-  if (v.systolicBP) form.append('systolicBP', String(v.systolicBP));
-  if (v.diastolicBP) form.append('diastolicBP', String(v.diastolicBP));
-  if (v.temperature) form.append('temperature', String(v.temperature));
-  if (v.heartRate) form.append('heartRate', String(v.heartRate));
+  if (v.systolicBP !== undefined) form.append('systolicBP', String(v.systolicBP));
+  if (v.diastolicBP !== undefined) form.append('diastolicBP', String(v.diastolicBP));
+  if (v.temperature !== undefined) form.append('temperature', String(v.temperature));
+  if (v.heartRate !== undefined) form.append('heartRate', String(v.heartRate));
   if (v.hasCough !== undefined) form.append('hasCough', String(v.hasCough));
   if (v.hasHeadaches !== undefined) form.append('hasHeadaches', String(v.hasHeadaches));
   if (v.canSmellTaste !== undefined) form.append('canSmellTaste', String(v.canSmellTaste));
@@ -42,5 +42,3 @@ export async function multimodalDiagnose(params: { image?: File; vitals: Patient
   if (res.error) throw res.error;
   return res.data as AnalysisResult;
 }
-
-

@@ -15,6 +15,16 @@ export default function VoiceRecorder({ onTranscribed, onError, language, classN
   const [permissionDenied, setPermissionDenied] = useState(false);
   const [transcript, setTranscript] = useState("");
   const [loading, setLoading] = useState(false);
+  const [warning, setWarning] = useState("");
+
+  useEffect(() => {
+    // Show warning for unsupported languages
+    if (language === 'or') {
+      setWarning("Odia language is not currently supported.");
+    } else {
+      setWarning("");
+    }
+  }, [language]);
 
   useEffect(() => {
     return () => {
@@ -79,14 +89,30 @@ export default function VoiceRecorder({ onTranscribed, onError, language, classN
         body: formData,
       });
       if (!res.ok) {
-        const errText = await res.text();
-        throw new Error(errText || 'Transcription failed');
+        const errData = await res.json().catch(() => ({}));
+        const errorMsg = errData.error || 'Transcription failed';
+        const suggestion = errData.suggestion || '';
+        
+        // Provide more specific error messages based on status code
+        let fullErrorMsg = errorMsg;
+        if (res.status === 401) {
+          fullErrorMsg = 'API authentication failed. Please check your API key configuration.';
+        } else if (res.status === 501) {
+          fullErrorMsg = 'Speech-to-text service not configured. ' + (suggestion || 'Please contact system administrator.');
+        } else if (res.status === 400) {
+          fullErrorMsg = 'Bad request. ' + errorMsg;
+        } else if (res.status === 429) {
+          fullErrorMsg = 'API quota exceeded. Please try again later. ' + (suggestion || 'Consider switching to a different provider.');
+        }
+        
+        throw new Error(suggestion ? `${fullErrorMsg} ${suggestion}` : fullErrorMsg);
       }
       const data = await res.json();
       setTranscript(data.transcript || '');
       onTranscribed?.(data.transcript || '', data.symptoms || {});
     } catch (e: any) {
-      onError?.(e?.message || 'Upload failed');
+      console.error('Transcription error:', e);
+      onError?.(e?.message || 'Transcription failed. Please check your network connection and API configuration.');
     } finally {
       setLoading(false);
     }
@@ -94,9 +120,15 @@ export default function VoiceRecorder({ onTranscribed, onError, language, classN
 
   return (
     <div className={className}>
+      {warning && (
+        <div className="mb-4 p-3 bg-yellow-900/30 border border-yellow-700 rounded-lg">
+          <p className="text-yellow-300 text-sm">{warning}</p>
+        </div>
+      )}
       <div className="flex items-center gap-4">
         {!isRecording ? (
           <button
+            type="button"
             onClick={startRecording}
             className="px-6 py-3 rounded-xl bg-gradient-to-r from-primary-500 to-emerald-500 hover:from-primary-600 hover:to-emerald-600 text-white shadow-lg transform hover:-translate-y-0.5 transition-all"
           >
@@ -104,6 +136,7 @@ export default function VoiceRecorder({ onTranscribed, onError, language, classN
           </button>
         ) : (
           <button
+            type="button"
             onClick={stopRecording}
             className="px-6 py-3 rounded-xl bg-gradient-to-r from-red-500 to-red-600 hover:from-red-600 hover:to-red-700 text-white shadow-lg transform hover:-translate-y-0.5 transition-all flex items-center"
           >
