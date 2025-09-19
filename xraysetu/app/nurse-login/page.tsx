@@ -4,18 +4,33 @@ import { useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import Link from 'next/link';
 import Image from 'next/image';
-import LoginForm from '@/components/ui/LoginForm';
+import NurseLoginForm from '@/components/ui/NurseLoginForm';
 import useAuth from '@/hooks/useAuth';
 import { Loader2 } from 'lucide-react';
 
-export default function LoginPage() {
+export default function NurseLoginPage() {
   const { isAuthenticatedUser, isLoading } = useAuth();
   const router = useRouter();
   
-  // Redirect to analyze page if already authenticated
+  // Redirect to nurse dashboard if already authenticated
   useEffect(() => {
     if (!isLoading && isAuthenticatedUser) {
-      router.push('/analyze');
+      // Check if user is a nurse and redirect accordingly
+      const userData = localStorage.getItem('userData');
+      if (userData) {
+        try {
+          const user = JSON.parse(userData);
+          if (user.role === 'nurse') {
+            router.push('/nurse-dashboard');
+          } else {
+            router.push('/analyze');
+          }
+        } catch (error) {
+          router.push('/analyze');
+        }
+      } else {
+        router.push('/analyze');
+      }
     }
   }, [isAuthenticatedUser, isLoading, router]);
 
@@ -85,49 +100,33 @@ export default function LoginPage() {
               </h1>
             </div>
             <p className="text-xl text-primary-300 mb-6">
-              Clinical Decision Support System
+              Nurse Portal
             </p>
             <p className="text-gray-200">
-              Welcome to the AI-powered chest X-ray analysis platform designed to assist medical professionals with rapid and accurate diagnoses.
+              Access the nurse portal for streamlined patient care and X-ray analysis with comprehensive patient details collection.
             </p>
           </div>
         </div>
         
-        {/* Right side - Login Form */}
+        {/* Right side - Nurse Login Form */}
         <div className="md:w-1/2 p-8 flex flex-col justify-center backdrop-blur-[2px]">
           <div className="max-w-md mx-auto w-full bg-gray-900/80 p-8 rounded-lg shadow-2xl backdrop-blur-[2px]">
             <div className="mb-8">
-              <h2 className="text-2xl font-bold mb-2 text-white">Sign In</h2>
+              <h2 className="text-2xl font-bold mb-2 text-white">Nurse Sign In</h2>
               <p className="text-gray-300">
-                Enter your credentials to access the platform
+                Enter your nurse credentials to access the portal
               </p>
             </div>
             
-            <LoginForm />
+            <NurseLoginForm />
             
             <div className="mt-6 text-center">
-              <p className="text-sm text-gray-300 mb-4">
-                Don't have an account?{" "}
-                <Link href="/register" className="text-primary-400 hover:underline font-medium">
-                  Create an account
+              <p className="text-sm text-gray-300">
+                Regular user?{" "}
+                <Link href="/login" className="text-primary-400 hover:underline font-medium">
+                  User login
                 </Link>
               </p>
-              
-              {/* Nurse portal access */}
-              <div className="border-t border-gray-700 pt-6">
-                <p className="text-sm text-gray-400 mb-4">Healthcare professional?</p>
-                <div className="flex justify-center">
-                  <Link
-                    href="/nurse-login"
-                    className="flex items-center justify-center px-4 py-2 bg-gradient-to-r from-blue-600 to-blue-700 hover:from-blue-700 hover:to-blue-800 text-white text-sm font-medium rounded-lg transition-all transform hover:-translate-y-0.5"
-                  >
-                    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                      <path strokeLinecap="round" strokeLinejoin="round" strokeWidth="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z" />
-                    </svg>
-                    Nurse Portal
-                  </Link>
-                </div>
-              </div>
             </div>
           </div>
         </div>

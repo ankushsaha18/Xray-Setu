@@ -90,6 +90,7 @@ export default function Home() {
                     Learn More
                   </Link>
                 </div>
+              
               </div>
               <div className="order-1 lg:order-2 flex justify-center">
                 <div className="relative">

@@ -12,13 +12,26 @@ const Navbar = () => {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const pathname = usePathname();
   const { isAuthenticatedUser, logout, user } = useAuth();
-
+const hideAnalyse = pathname.startsWith('/nurse-dashboard') || pathname.startsWith('/nurse');
   const navLinks = [
     { name: 'Home', href: '/' },
     { name: 'Analyze', href: '/analyze', protected: true },
     { name: 'About', href: '/about' },
     { name: 'Contact', href: '/contact' },
   ];
+
+  // Get user role for role-based navigation
+  const getUserRole = () => {
+    if (typeof window === 'undefined') return null;
+    try {
+      const userData = localStorage.getItem('userData');
+      return userData ? JSON.parse(userData).role : null;
+    } catch {
+      return null;
+    }
+  };
+
+  const userRole = getUserRole();
 
   const toggleMobileMenu = () => setMobileMenuOpen(!mobileMenuOpen);
 
@@ -52,7 +65,8 @@ const Navbar = () => {
             <div className="hidden md:block ml-10">
               <div className="flex items-center space-x-8">
                 {navLinks.map((link) =>
-                  (!link.protected || isAuthenticatedUser) && (
+                  (!link.protected || isAuthenticatedUser) &&
+                  !(link.name === 'Analyze' && hideAnalyse) && (
                     <Link
                       key={link.name}
                       href={link.href}
@@ -74,6 +88,29 @@ const Navbar = () => {
                     </Link>
                   )
                 )}
+                
+                {/* Role-based navigation links */}
+                {isAuthenticatedUser && userRole === 'nurse' && (
+                  <Link
+                    href="/nurse-dashboard"
+                    className={classNames(
+                      'relative text-lg font-medium transition-colors duration-300 group py-2',
+                      {
+                        'text-primary-400': isActiveLink('/nurse-dashboard'),
+                        'text-gray-300 hover:text-primary-300': !isActiveLink('/nurse-dashboard'),
+                      }
+                    )}
+                  >
+                    Nurse Dashboard
+                    <span className={classNames(
+                      'absolute bottom-0 left-0 w-full h-0.5 bg-gradient-to-r from-primary-400 to-emerald-400 transition-transform duration-300 transform scale-x-0 group-hover:scale-x-100',
+                      {
+                        'scale-x-100': isActiveLink('/nurse-dashboard'),
+                      }
+                    )} />
+                  </Link>
+                )}
+                
               </div>
             </div>
           </div>
@@ -132,7 +169,8 @@ const Navbar = () => {
       })}>
         <div className="px-2 pt-2 pb-3 space-y-3 sm:px-3 bg-gray-900/95 backdrop-blur-lg border-t border-gray-800">
           {navLinks.map((link) =>
-            (!link.protected || isAuthenticatedUser) && (
+            (!link.protected || isAuthenticatedUser) &&
+            !(link.name === 'Analyze' && hideAnalyse) && (
               <Link
                 key={link.name}
                 href={link.href}
@@ -149,6 +187,24 @@ const Navbar = () => {
               </Link>
             )
           )}
+
+          {/* Role-based mobile navigation links */}
+          {isAuthenticatedUser && userRole === 'nurse' && (
+            <Link
+              href="/nurse-dashboard"
+              className={classNames(
+                'block px-3 py-3 rounded-lg text-base font-medium transition-colors duration-300',
+                {
+                  'bg-gradient-to-r from-primary-900/50 to-emerald-900/30 text-primary-300 border-l-4 border-primary-500': isActiveLink('/nurse-dashboard'),
+                  'text-gray-300 hover:bg-gray-800/50': !isActiveLink('/nurse-dashboard'),
+                }
+              )}
+              onClick={() => setMobileMenuOpen(false)}
+            >
+              Nurse Dashboard
+            </Link>
+          )}
+
 
           {isAuthenticatedUser ? (
             <button
