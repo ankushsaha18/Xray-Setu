@@ -237,8 +237,9 @@ export default function ResultPage() {
       <ProtectedRoute>
         <div className="flex justify-center items-center min-h-[60vh]">
           <div className="animate-pulse flex flex-col items-center">
-            <div className="w-24 h-24 rounded-full bg-blue-200 dark:bg-blue-900/40"></div>
-            <div className="mt-4 h-6 w-36 bg-gray-200 dark:bg-gray-700 rounded"></div>
+            <div className="w-24 h-24 rounded-full bg-gradient-to-r from-primary-500 to-emerald-500 opacity-20"></div>
+            <div className="mt-4 h-6 w-48 bg-gradient-to-r from-primary-500/30 to-emerald-500/30 rounded-lg"></div>
+            <div className="mt-2 h-4 w-36 bg-gray-200 dark:bg-gray-700 rounded"></div>
           </div>
         </div>
       </ProtectedRoute>
@@ -249,15 +250,24 @@ export default function ResultPage() {
     return (
       <ProtectedRoute>
         <div className="max-w-5xl mx-auto px-4 py-8 text-center">
-          <h1 className="text-2xl font-bold mb-4">No Results Found</h1>
-          <p className="mb-6">Please upload and analyze an X-ray image first.</p>
-          <Link 
-            href="/analyze"
-            className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors"
-          >
-            <ArrowLeft className="mr-2 h-4 w-4" />
-            Go to Analysis Page
-          </Link>
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl p-1 border border-gray-700 max-w-2xl mx-auto">
+            <div className="bg-gray-900 rounded-xl p-8">
+              <div className="w-16 h-16 bg-gradient-to-r from-primary-500 to-emerald-500 rounded-full flex items-center justify-center mx-auto mb-6">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-8 w-8 text-white" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9.172 16.172a4 4 0 015.656 0M9 10h.01M15 10h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+              </div>
+              <h1 className="text-2xl font-bold mb-4 text-white">No Results Found</h1>
+              <p className="mb-6 text-gray-400">Please upload and analyze an X-ray image first.</p>
+              <Link 
+                href="/analyze"
+                className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary-500 to-emerald-500 hover:from-primary-600 hover:to-emerald-600 text-white rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5"
+              >
+                <ArrowLeft className="mr-2 h-5 w-5" />
+                Go to Analysis Page
+              </Link>
+            </div>
+          </div>
         </div>
       </ProtectedRoute>
     );
@@ -274,27 +284,27 @@ export default function ResultPage() {
       )}
       
       <div id="report-container" className="max-w-6xl mx-auto px-4 py-8">
-        <div className="flex flex-wrap items-center justify-between mb-8 gap-4">
-          <div>
-            <h1 className="text-3xl font-bold mb-2">X-Ray Analysis Results</h1>
-            <p className="text-gray-600 dark:text-gray-400">
-              AI-assisted analysis and clinical decision support
-            </p>
-          </div>
-          <div className="flex space-x-3">
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold mb-4 bg-clip-text text-transparent bg-gradient-to-r from-primary-400 to-emerald-400">
+            X-Ray Analysis Results
+          </h1>
+          <p className="text-gray-400 max-w-2xl mx-auto mb-8">
+            AI-assisted analysis and clinical decision support
+          </p>
+          <div className="flex justify-center space-x-4">
             <Link 
               href="/analyze"
-              className="inline-flex items-center px-4 py-2 bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 text-gray-800 dark:text-white rounded-md transition-colors"
+              className="inline-flex items-center px-6 py-3 bg-gray-800 hover:bg-gray-700 text-gray-200 rounded-xl shadow transition-all border border-gray-700 transform hover:-translate-y-0.5"
             >
-              <ArrowLeft className="mr-2 h-4 w-4" />
+              <ArrowLeft className="mr-2 h-5 w-5" />
               New Analysis
             </Link>
             <button
               onClick={handleDownloadReport}
               disabled={isDownloading}
-              className="inline-flex items-center px-4 py-2 bg-blue-600 hover:bg-blue-700 text-white rounded-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+              className="inline-flex items-center px-6 py-3 bg-gradient-to-r from-primary-500 to-emerald-500 hover:from-primary-600 hover:to-emerald-600 text-white rounded-xl shadow-lg transition-all transform hover:-translate-y-0.5 disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              <Download className="mr-2 h-4 w-4" />
+              <Download className="mr-2 h-5 w-5" />
               {isDownloading ? 'Generating...' : 'Download Report'}
             </button>
           </div>
@@ -302,39 +312,73 @@ export default function ResultPage() {
 
         <div className="grid md:grid-cols-2 gap-8 mb-8">
           {/* Left column - Image with enhanced heatmap */}
-          <div>
-            <h2 className="text-xl font-semibold mb-4">X-Ray Image</h2>
-            <div id="xray-image">
-              <HeatmapViewer 
-                originalImageUrl={originalImageUrl} 
-                predictionResult={result || undefined}
-                className="aspect-square w-full"
-              />
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl p-1 border border-gray-700">
+            <div className="bg-gray-900 rounded-xl p-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16l4.586-4.586a2 2 0 012.828 0L16 16m-2-2l1.586-1.586a2 2 0 012.828 0L20 14m-6-6h.01M6 20h12a2 2 0 002-2V6a2 2 0 00-2-2H6a2 2 0 00-2 2v12a2 2 0 002 2z" />
+                </svg>
+                X-Ray Image
+              </h2>
+              <div id="xray-image" className="rounded-lg overflow-hidden">
+                <HeatmapViewer 
+                  originalImageUrl={originalImageUrl} 
+                  predictionResult={result || undefined}
+                  className="aspect-square w-full"
+                />
+              </div>
+              <p className="mt-4 text-sm text-gray-400 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+                </svg>
+                Toggle the heatmap overlay using the eye icon in the top right corner.
+              </p>
             </div>
-            <p className="mt-2 text-sm text-gray-500 dark:text-gray-400 italic">
-              Toggle the heatmap overlay using the eye icon in the top right corner.
-            </p>
           </div>
           
           {/* Right column - Prediction results */}
-          <div>
-            <h2 className="text-xl font-semibold mb-4">Analysis Results</h2>
-            <PredictionCard result={result || {}} />
+          <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl p-1 border border-gray-700">
+            <div className="bg-gray-900 rounded-xl p-6">
+              <h2 className="text-xl font-semibold mb-4 flex items-center text-white">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z" />
+                </svg>
+                Analysis Results
+              </h2>
+              <PredictionCard result={result || {}} />
+            </div>
           </div>
         </div>
 
         {/* Clinical advice section */}
-        <div className="mb-8">
-          <h2 className="text-xl font-semibold mb-4">Clinical Guidance</h2>
-          <RuleBasedAdvice result={result || {}} />
+        <div className="bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl p-1 border border-gray-700 mb-8">
+          <div className="bg-gray-900 rounded-xl p-6">
+            <h2 className="text-xl font-semibold mb-4 flex items-center text-white">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 mr-2 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 12h6m-6 4h6m2 5H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z" />
+              </svg>
+              Clinical Guidance
+            </h2>
+            <RuleBasedAdvice result={result || {}} />
+          </div>
         </div>
         
-        <div className="bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-lg p-4 mb-6">
-          <p className="text-sm text-yellow-800 dark:text-yellow-300">
-            <strong>Disclaimer:</strong> This system is intended as a clinical decision support tool only. 
-            The suggestions provided are not a substitute for professional medical judgment. 
-            Always correlate with clinical findings and seek specialist consultation as appropriate.
-          </p>
+        <div className="bg-gradient-to-r from-amber-900/30 to-orange-900/30 border border-amber-800/50 rounded-2xl p-6 mb-6">
+          <div className="flex items-start">
+            <div className="p-2 rounded-lg bg-amber-900/50 mr-4">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+              </svg>
+            </div>
+            <div>
+              <h3 className="font-semibold text-lg mb-2 text-amber-200">Important Disclaimer</h3>
+              <p className="text-amber-300">
+                This system is intended as a clinical decision support tool only. 
+                The suggestions provided are not a substitute for professional medical judgment. 
+                Always correlate with clinical findings and seek specialist consultation as appropriate.
+              </p>
+            </div>
+          </div>
         </div>
       </div>
     </ProtectedRoute>

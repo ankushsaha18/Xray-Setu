@@ -82,7 +82,9 @@ const Navbar = () => {
           <div className="hidden md:flex items-center space-x-4">
             {isAuthenticatedUser ? (
               <>
-                <span className="text-gray-300 font-semibold text-sm">Hi, {user?.name || 'User'}</span>
+                <span className="text-gray-300 font-semibold text-sm">
+                  Hi, {user?.name || user?.username || 'User'}
+                </span>
                 <button
                   onClick={logout}
                   className="flex items-center space-x-1 px-4 py-2 rounded-full text-sm font-medium text-gray-300 hover:bg-gray-800 transition-colors group"

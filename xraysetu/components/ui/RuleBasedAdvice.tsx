@@ -201,71 +201,144 @@ const RuleBasedAdvice: React.FC<RuleBasedAdviceProps> = ({ result, className = '
   
   const advice = getAdvice();
 
-  // Symptom-aware supportive care suggestions (from voice transcript extraction)
+  // Symptom-aware supportive care suggestions (from voice transcript extraction and vitals)
   const derivedSymptoms: Record<string, boolean> = result.derivedSymptoms || {};
+  
+  // Extract symptoms from vitals if available
+  const vitalsSymptoms: Record<string, boolean> = {};
+  if (result.vitals) {
+    if (result.vitals.hasCough) vitalsSymptoms.cough = true;
+    if (result.vitals.hasHeadaches) vitalsSymptoms.headache = true;
+    if (!result.vitals.canSmellTaste) vitalsSymptoms.loss_of_smell = true;
+    // Check for fever based on temperature (>37.5°C is generally considered fever)
+    if (result.vitals.temperature && result.vitals.temperature > 37.5) vitalsSymptoms.fever_symptom = true;
+  }
+  
+  // Combine symptoms from both sources
+  const allSymptoms: Record<string, boolean> = { ...derivedSymptoms, ...vitalsSymptoms };
+  
   const symptomRecommendations: string[] = [];
 
-  if (derivedSymptoms.cough) {
+  // Enhanced symptom-based guidance
+  if (allSymptoms.cough) {
     symptomRecommendations.push(
       'Hydration and warm fluids; consider honey (if not diabetic) and steam inhalation',
-      'Over-the-counter cough suppressant if troubling (per local guidelines)'
+      'Over-the-counter cough suppressant if troubling (per local guidelines)',
+      'Consider saline gargles to soothe throat irritation',
+      'Avoid irritants like smoke and strong odors'
     );
   }
-  if (derivedSymptoms.fever_symptom) {
+  
+  if (allSymptoms.fever_symptom) {
     symptomRecommendations.push(
       'Paracetamol/acetaminophen for fever as per dosing guidelines',
-      'Adequate oral fluids and rest'
+      'Adequate oral fluids and rest',
+      'Use tepid sponging if fever is high and not responding to medication',
+      'Monitor for signs of dehydration and worsening symptoms'
     );
   }
-  if (derivedSymptoms.breathlessness) {
+  
+  if (allSymptoms.breathlessness) {
     symptomRecommendations.push(
       'Monitor SpO2 if available; seek urgent care if SpO2 < 94% or worsening',
-      'Avoid exertion; maintain upright position during episodes'
+      'Avoid exertion; maintain upright position during episodes',
+      'Practice pursed-lip breathing techniques',
+      'Ensure good ventilation in the room and avoid allergens'
     );
   }
-  if (derivedSymptoms.chest_pain) {
+  
+  if (allSymptoms.chest_pain) {
     symptomRecommendations.push(
-      'Chest pain can be serious; seek urgent medical evaluation, especially if severe or persistent'
+      'Chest pain can be serious; seek urgent medical evaluation, especially if severe or persistent',
+      'Avoid physical exertion until evaluated by a healthcare provider',
+      'Practice relaxation techniques to reduce anxiety-related chest discomfort',
+      'Monitor for associated symptoms like sweating, nausea, or radiation to arm/jaw'
     );
   }
-  if (derivedSymptoms.loss_of_smell) {
+  
+  if (allSymptoms.loss_of_smell) {
     symptomRecommendations.push(
-      'Loss of smell often recovers over weeks; consider olfactory training exercises'
+      'Loss of smell often recovers over weeks; consider olfactory training exercises',
+      'Keep a log of when smell returns to track recovery',
+      'Be cautious with food spoilage and gas leaks due to reduced smell sensitivity',
+      'Consider zinc supplementation if deficient (consult healthcare provider)'
+    );
+  }
+  
+  if (allSymptoms.headache) {
+    symptomRecommendations.push(
+      'Ensure adequate hydration and rest',
+      'Apply cold or warm compress to forehead or neck',
+      'Consider over-the-counter pain relievers as per dosing guidelines',
+      'Avoid bright lights and loud noises; rest in a quiet, dark room'
+    );
+  }
+  
+  if (allSymptoms.sore_throat) {
+    symptomRecommendations.push(
+      'Gargle with warm salt water several times a day',
+      'Stay hydrated with warm liquids like tea with honey',
+      'Use throat lozenges or sprays for temporary relief',
+      'Avoid irritants like smoke and dry air'
+    );
+  }
+  
+  if (allSymptoms.fatigue) {
+    symptomRecommendations.push(
+      'Prioritize rest and maintain regular sleep schedule',
+      'Eat a balanced diet with adequate calories and nutrients',
+      'Gradually increase activity as tolerated',
+      'Stay hydrated and limit caffeine intake'
     );
   }
   
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 ${className}`}>
-      <div className="flex items-center mb-4">
-        {advice.icon}
-        <h3 className="text-xl font-bold ml-2">
-          {advice.title}
-        </h3>
-      </div>
+    <div className={`bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl p-1 border border-gray-700 ${className}`}>
+      <div className="bg-gray-900 rounded-xl p-6">
+        <div className="flex items-center mb-4">
+          <div className="p-2 rounded-lg bg-gray-800 mr-3">
+            {advice.icon}
+          </div>
+          <h3 className="text-xl font-bold text-white">
+            {advice.title}
+          </h3>
+        </div>
       
-      <p className="mb-4 text-gray-700 dark:text-gray-300">
+      <p className="mb-6 text-gray-300 bg-gray-800/50 p-4 rounded-lg border border-gray-700">
         {advice.description}
       </p>
       
-      <div>
-        <h4 className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-2">
+      <div className="mb-6">
+        <h4 className="text-sm font-medium text-gray-300 mb-3 flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2" />
+          </svg>
           Recommendations
         </h4>
-        <ul className="space-y-2">
+        <ul className="space-y-3">
           {advice.recommendations.map((rec, index) => (
-            <li key={index} className="flex items-start">
-              <span className="mr-2 mt-0.5 text-blue-500 dark:text-blue-400">•</span>
-              <span className="text-sm text-gray-700 dark:text-gray-300">{rec}</span>
+            <li key={index} className="flex items-start bg-gray-800/30 p-3 rounded-lg border border-gray-700/50 hover:border-gray-600 transition-colors">
+              <div className="mr-3 mt-0.5 flex-shrink-0">
+                <div className="w-2 h-2 bg-primary-500 rounded-full mt-1.5"></div>
+              </div>
+              <span className="text-sm text-gray-300">{rec}</span>
             </li>
           ))}
           {symptomRecommendations.length > 0 && (
-            <li className="mt-2">
-              <div className="text-sm font-medium text-gray-500 dark:text-gray-400 mb-1">Symptom-guided care</div>
-              <ul className="space-y-1">
+            <li className="mt-4 pt-4 border-t border-gray-700/50">
+              <div className="text-sm font-medium text-gray-300 mb-3 flex items-center">
+                <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                  <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10" />
+                </svg>
+                Symptom-guided care (from voice symptoms and vitals)
+              </div>
+              <ul className="space-y-3">
                 {symptomRecommendations.map((rec, i) => (
-                  <li key={`sym-${i}`} className="flex items-start">
-                    <span className="mr-2 mt-0.5 text-blue-500 dark:text-blue-400">•</span>
-                    <span className="text-sm text-gray-700 dark:text-gray-300">{rec}</span>
+                  <li key={`sym-${i}`} className="flex items-start bg-gray-800/30 p-3 rounded-lg border border-gray-700/50 hover:border-gray-600 transition-colors">
+                    <div className="mr-3 mt-0.5 flex-shrink-0">
+                      <div className="w-2 h-2 bg-emerald-500 rounded-full mt-1.5"></div>
+                    </div>
+                    <span className="text-sm text-gray-300">{rec}</span>
                   </li>
                 ))}
               </ul>
@@ -274,13 +347,16 @@ const RuleBasedAdvice: React.FC<RuleBasedAdviceProps> = ({ result, className = '
         </ul>
       </div>
       
-      <div className="mt-6 pt-4 border-t border-gray-200 dark:border-gray-700">
-        <p className="text-xs text-gray-500 dark:text-gray-400 italic">
+      <div className="mt-6 pt-4 border-t border-gray-700/50">
+        <p className="text-xs text-gray-400 italic flex items-center">
+          <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-amber-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z" />
+          </svg>
           Note: This is decision support only. Clinical judgment should always supersede automated predictions.
         </p>
       </div>
     </div>
-  );
+  </div>);
 };
 
 export default RuleBasedAdvice;

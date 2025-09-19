@@ -112,38 +112,45 @@ const PredictionCard: React.FC<PredictionCardProps> = ({ result, className = '' 
   // If no predictions are available
   if (diagnosisEntries.length === 0) {
     return (
-      <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 ${className}`}>
-        <div className="flex items-center mb-4">
-          <Info className="h-6 w-6 text-blue-500" />
-          <h3 className="text-xl font-bold ml-2">No predictions available</h3>
+      <div className={`bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl p-1 border border-gray-700 ${className}`}>
+        <div className="bg-gray-900 rounded-xl p-6">
+          <div className="flex items-center mb-4">
+            <div className="p-2 rounded-lg bg-blue-900/50 mr-3">
+              <Info className="h-6 w-6 text-blue-400" />
+            </div>
+            <h3 className="text-xl font-bold text-white">No predictions available</h3>
+          </div>
+          <p className="text-gray-400">Unable to generate predictions from the provided data.</p>
         </div>
-        <p className="text-gray-500 dark:text-gray-400">Unable to generate predictions from the provided data.</p>
       </div>
     );
   }
 
   return (
-    <div className={`bg-white dark:bg-gray-800 rounded-xl shadow-lg p-6 ${className}`}>
-      <div className="flex items-center mb-4">
-        {getStatusIcon()}
-        <h3 className={`text-xl font-bold ml-2 ${getStatusColor()}`}>
-          {topPrediction.label}
-        </h3>
-      </div>
+    <div className={`bg-gradient-to-br from-gray-800 to-gray-900 rounded-2xl shadow-xl p-1 border border-gray-700 ${className}`}>
+      <div className="bg-gray-900 rounded-xl p-6">
+        <div className="flex items-center mb-6">
+          <div className="p-2 rounded-lg bg-gray-800 mr-3">
+            {getStatusIcon()}
+          </div>
+          <h3 className={`text-2xl font-bold ${getStatusColor()}`}>
+            {topPrediction.label}
+          </h3>
+        </div>
 
-      <div className="mb-6">
-        <div className="flex justify-between items-center mb-2">
-          <span className="text-sm font-medium text-gray-500 dark:text-gray-400">
+      <div className="mb-6 bg-gray-800/50 rounded-xl p-5 border border-gray-700">
+        <div className="flex justify-between items-center mb-3">
+          <span className="text-sm font-medium text-gray-300">
             Confidence Level
           </span>
-          <span className="text-lg font-bold">
-            {Math.min(Math.round(topPrediction.confidence * 100), 100) }%
+          <span className="text-xl font-bold text-white">
+            {Math.min(Math.round(topPrediction.confidence * 100), 100)}%
           </span>
         </div>
-        <div className="w-full bg-gray-200 dark:bg-gray-700 rounded-full h-2.5">
+        <div className="w-full bg-gray-700 rounded-full h-3">
           <div 
-            className="h-2.5 rounded-full bg-blue-600" 
-            style={{ width: `${Math.min(Math.round(topPrediction.confidence * 100), 100) }%` }}
+            className="h-3 rounded-full bg-gradient-to-r from-primary-500 to-emerald-500" 
+            style={{ width: `${Math.min(Math.round(topPrediction.confidence * 100), 100)}%` }}
           ></div>
         </div>
       </div>
@@ -165,8 +172,8 @@ const PredictionCard: React.FC<PredictionCardProps> = ({ result, className = '' 
                 {chartData.map((entry, index) => (
                   <Cell 
                     key={`cell-${index}`} 
-                    fill={entry.name === topPrediction.label ? '#3B82F6' : 
-                          entry.confidence > 30 ? '#60A5FA' : '#94A3B8'} 
+                    fill={entry.name === topPrediction.label ? '#10B981' : 
+                          entry.confidence > 30 ? '#34D399' : '#6EE7B7'} 
                   />
                 ))}
               </Bar>
@@ -184,7 +191,7 @@ const PredictionCard: React.FC<PredictionCardProps> = ({ result, className = '' 
         </div>
       )}
     </div>
-  );
+  </div>);
 }
 
 export default PredictionCard;    

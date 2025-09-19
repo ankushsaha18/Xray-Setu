@@ -139,9 +139,14 @@ const HeatmapViewer: React.FC<HeatmapViewerProps> = ({
       
       {/* Advanced control panel */}
       {hasHeatmap && showControls && (
-        <div className="absolute bottom-0 left-0 right-0 bg-gray-800/80 backdrop-blur-sm text-white p-3 transition-all duration-300">
-          <div className="flex items-center justify-between mb-2">
-            <span className="text-xs font-medium">Heatmap Opacity: {opacity}%</span>
+        <div className="absolute bottom-0 left-0 right-0 bg-gradient-to-t from-gray-900/90 to-gray-800/80 backdrop-blur-sm text-white p-4 transition-all duration-300 rounded-b-xl">
+          <div className="flex items-center justify-between mb-3">
+            <span className="text-sm font-medium flex items-center">
+              <svg xmlns="http://www.w3.org/2000/svg" className="h-4 w-4 mr-2 text-primary-400" fill="none" viewBox="0 0 24 24" stroke="currentColor">
+                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6V4m0 2a2 2 0 100 4m0-4a2 2 0 110 4m-6 8a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4m6 6v10m6-2a2 2 0 100-4m0 4a2 2 0 110-4m0 4v2m0-6V4" />
+              </svg>
+              Heatmap Opacity: {opacity}%
+            </span>
           </div>
           <input 
             type="range" 
@@ -149,9 +154,9 @@ const HeatmapViewer: React.FC<HeatmapViewerProps> = ({
             max="100" 
             value={opacity}
             onChange={(e) => setOpacity(parseInt(e.target.value))}
-            className="w-full h-2 bg-gray-300 rounded-lg appearance-none cursor-pointer accent-blue-500"
+            className="w-full h-2 bg-gray-700 rounded-lg appearance-none cursor-pointer [&::-webkit-slider-thumb]:appearance-none [&::-webkit-slider-thumb]:h-4 [&::-webkit-slider-thumb]:w-4 [&::-webkit-slider-thumb]:rounded-full [&::-webkit-slider-thumb]:bg-primary-500"
           />
-          <div className="flex justify-between mt-2 text-xs text-gray-300">
+          <div className="flex justify-between mt-2 text-xs text-gray-400">
             <span>0%</span>
             <span>50%</span>
             <span>100%</span>
@@ -164,7 +169,7 @@ const HeatmapViewer: React.FC<HeatmapViewerProps> = ({
         <div className="absolute top-4 right-4 flex space-x-2">
           <button
             onClick={toggleHeatmap}
-            className="p-2 rounded-full bg-gray-800/70 hover:bg-gray-900 text-white transition-colors"
+            className="p-2.5 rounded-full bg-gray-800/70 hover:bg-gray-900 text-white transition-all duration-300 backdrop-blur-sm border border-gray-700/50 hover:border-primary-500/50 shadow-lg"
             aria-label={showHeatmap ? "Hide heatmap" : "Show heatmap"}
           >
             {showHeatmap ? (
@@ -176,7 +181,7 @@ const HeatmapViewer: React.FC<HeatmapViewerProps> = ({
           
           <button
             onClick={toggleControls}
-            className="p-2 rounded-full bg-gray-800/70 hover:bg-gray-900 text-white transition-colors"
+            className="p-2.5 rounded-full bg-gray-800/70 hover:bg-gray-900 text-white transition-all duration-300 backdrop-blur-sm border border-gray-700/50 hover:border-primary-500/50 shadow-lg"
             aria-label="Show advanced controls"
           >
             <SlidersHorizontal className="h-5 w-5" />
@@ -185,9 +190,10 @@ const HeatmapViewer: React.FC<HeatmapViewerProps> = ({
       )}
       
       {/* Image status indicators */}
-      <div className="absolute bottom-3 left-3 flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-opacity duration-300">
+      <div className="absolute bottom-3 left-3 flex items-center space-x-2 opacity-0 group-hover:opacity-100 transition-all duration-300">
         {hasHeatmap && showHeatmap && (
-          <div className="bg-blue-600/80 text-white text-xs px-2 py-1 rounded-full">
+          <div className="bg-gradient-to-r from-primary-600 to-emerald-600 text-white text-xs px-3 py-1.5 rounded-full flex items-center shadow-lg">
+            <div className="w-2 h-2 bg-white rounded-full mr-2 animate-pulse"></div>
             Heatmap Active
           </div>
         )}

@@ -34,40 +34,41 @@ const AlertBanner: React.FC<AlertBannerProps> = ({
   
   return (
     <div className={`fixed inset-x-0 top-24 z-50 flex justify-center px-4 pointer-events-none ${className}`}>
-      <div className={`
-        bg-red-50 dark:bg-red-900 
-        border-l-4 border-red-500
-        text-red-800 dark:text-red-200
-        p-4 rounded-lg shadow-lg max-w-2xl w-full
+      <div className={
+        `bg-gradient-to-r from-red-900/80 to-orange-900/80 
+        border border-red-700/50
+        text-red-100
+        p-5 rounded-2xl shadow-2xl max-w-2xl w-full
         transition-all duration-500
         pointer-events-auto
-        ${isAnimating ? 'pulse-shadow' : ''}
-      `}>
+        backdrop-blur-sm
+        ${isAnimating ? 'pulse-glow' : ''}`
+      }>
         <div className="flex">
-          <div className="shrink-0">
-            <AlertTriangle className={`
-              h-6 w-6 text-red-500
-              ${isAnimating ? 'animate-pulse' : ''}
-            `} />
+          <div className="shrink-0 flex items-center justify-center w-10 h-10 rounded-full bg-red-900/50 mr-3">
+            <AlertTriangle className={
+              `h-6 w-6 text-red-300
+              ${isAnimating ? 'animate-pulse' : ''}`
+            } />
           </div>
-          <div className="ml-3">
-            <div className="flex items-center justify-between">
-              <p className="text-lg font-bold">
+          <div className="flex-1">
+            <div className="flex items-start justify-between">
+              <h3 className="text-lg font-bold text-red-100">
                 High Risk: {condition} Detected
-              </p>
+              </h3>
               <button 
                 onClick={() => setIsVisible(false)}
-                className="inline-flex text-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ml-auto"
+                className="inline-flex text-red-300 hover:text-white focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 ml-4"
               >
                 <span className="sr-only">Dismiss</span>
                 <X className="h-5 w-5" />
               </button>
             </div>
-            <div className="mt-2">
-              <p className="text-sm">
+            <div className="mt-3">
+              <p className="text-red-200">
                 {condition} has been detected with {confidencePercentage}% confidence. Immediate clinical attention may be required.
               </p>
-              <p className="mt-3 text-sm font-medium">
+              <p className="mt-3 text-red-100 font-medium">
                 Additional testing and specialist consultation is recommended.
               </p>
             </div>
@@ -76,17 +77,17 @@ const AlertBanner: React.FC<AlertBannerProps> = ({
       </div>
       
       <style jsx global>{`
-        .pulse-shadow {
-          box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
-          animation: pulse-animation 2s infinite;
+        .pulse-glow {
+          box-shadow: 0 0 15px rgba(239, 68, 68, 0.5);
+          animation: pulse-glow 2s infinite;
         }
         
-        @keyframes pulse-animation {
+        @keyframes pulse-glow {
           0% {
             box-shadow: 0 0 0 0 rgba(239, 68, 68, 0.7);
           }
           70% {
-            box-shadow: 0 0 0 10px rgba(239, 68, 68, 0);
+            box-shadow: 0 0 0 15px rgba(239, 68, 68, 0);
           }
           100% {
             box-shadow: 0 0 0 0 rgba(239, 68, 68, 0);
