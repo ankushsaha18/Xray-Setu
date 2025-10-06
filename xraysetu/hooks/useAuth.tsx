@@ -1,0 +1,371 @@
+"use client";
+
+import { useState, useEffect, createContext, useContext } from 'react';
+import { useRouter } from 'next/navigation';
+import { apiRequest } from '@/utils/apiClient';
+import { mockLogin, mockRegister } from '@/utils/mockService';
+import { isDemoMode } from '@/lib/config';
+import { isValidationError, ValidationError } from '@/utils/errorHandling';
+
+interface User {
+  id?: string;
+  username?: string;
+  email?: string;
+  name?: string;
+  role?: string; // Add role field
+}
+
+interface AuthTokens {
+  access_token: string;
+  refresh_token: string;
+}
+
+interface AuthContextType {
+  user: User | null;
+  loading: boolean;
+  login: (username: string, password: string) => Promise<boolean>;
+  register: (username: string, email: string, password: string, role?: string) => Promise<boolean>; // Add role parameter
+  logout: () => void;
+  isLoading: boolean;
+  isAuthenticatedUser: boolean;
+  error: string | null;
+  setError: (error: string | null) => void; // Add setError to context type
+}
+
+const AuthContext = createContext<AuthContextType | null>(null);
+
+export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
+  const [user, setUser] = useState<User | null>(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
+  const [usingMockAuth, setUsingMockAuth] = useState(false);
+  const router = useRouter();
+
+  const safelyParse = <T,>(json: string | null): T | null => {
+    if (!json || json === "undefined") return null;
+    try {
+      return JSON.parse(json) as T;
+    } catch (e) {
+      console.error("Error parsing JSON:", e);
+      return null;
+    }
+  };
+
+  const safelyGet = (key: string): string | null => {
+    if (typeof window === 'undefined') return null;
+
+    try {
+      const val = localStorage.getItem(key);
+      return val === "undefined" ? null : val;
+    } catch (e) {
+      console.warn(`Error accessing localStorage for ${key}:`, e);
+      return null;
+    }
+  };
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+
+    const checkAuth = () => {
+      try {
+        const tokensString = safelyGet('authTokens');
+        const tokens = safelyParse<AuthTokens>(tokensString);
+
+        if (tokens?.access_token) {
+          const userDataString = safelyGet('userData');
+          const userData = safelyParse<User>(userDataString);
+
+          if (userData) {
+            setUser(userData);
+            setLoading(false);
+            return;
+          }
+        }
+
+        const legacyToken = safelyGet('authToken');
+        if (legacyToken) {
+          const userDataString = safelyGet('userData');
+          const userData = safelyParse<User>(userDataString);
+
+          if (userData) {
+            setUser(userData);
+            localStorage.setItem('authTokens', JSON.stringify({
+              access_token: legacyToken,
+              refresh_token: legacyToken
+            }));
+            setLoading(false);
+            return;
+          }
+        }
+
+        if (!user) {
+          setLoading(false);
+        } else {
+          setUser(null);
+          setLoading(false);
+        }
+      } catch (error) {
+        console.error("Error in auth check:", error);
+        setLoading(false);
+      }
+    };
+
+    checkAuth();
+
+    const handleStorageChange = (e: StorageEvent) => {
+      if (['authToken', 'authTokens', 'userData'].includes(e.key || '')) {
+        checkAuth();
+      }
+    };
+
+    window.addEventListener('storage', handleStorageChange);
+    window.addEventListener('focus', checkAuth);
+
+    return () => {
+      window.removeEventListener('storage', handleStorageChange);
+      window.removeEventListener('focus', checkAuth);
+    };
+  }, []);
+
+  useEffect(() => {
+    const checkMockMode = async () => {
+      const useMockAuth = await isDemoMode();
+      setUsingMockAuth(useMockAuth);
+
+      if (typeof window !== 'undefined') {
+        sessionStorage.setItem('usingMockAuth', useMockAuth ? 'true' : 'false');
+      }
+    };
+
+    checkMockMode().catch(console.error);
+  }, []);
+
+  const login = async (username: string, password: string): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+    
+    console.log('[Auth Hook] Attempting login with username:', username);
+
+    try {
+      const useMockAuth = await isDemoMode();
+      
+      console.log('[Auth Hook] Demo mode status:', useMockAuth);
+
+      if (useMockAuth) {
+        const mockUser = await mockLogin(username, password);
+
+        if (mockUser) {
+          localStorage.setItem('userData', JSON.stringify(mockUser));
+          localStorage.setItem('authTokens', JSON.stringify({
+            access_token: 'mock-token',
+            refresh_token: 'mock-refresh-token'
+          }));
+          localStorage.setItem('authToken', 'mock-token');
+
+          setUser(mockUser);
+          setUsingMockAuth(true);
+          return true;
+        } else {
+          setError('Invalid username or password');
+          return false;
+        }
+      }
+
+      console.log('[Auth Hook] Calling API for login');
+      const response = await apiRequest<any>({
+        endpoint: '/auth/login/',
+        method: 'POST',
+        body: { username, password },
+        requiresAuth: false
+      });
+      
+      console.log('[Auth Hook] API response:', response);
+
+      if (response.error) {
+        console.log('[Auth Hook] Login error:', response.error);
+        setError(response.error.message || 'Login failed');
+        return false;
+      }
+
+      // The API response data is directly in response.data, not nested
+      const data = response.data;
+
+      if (data) {
+        console.log('[Auth Hook] Login successful, setting tokens');
+        console.log('[Auth Hook] Data received:', data);
+        // Check if we have the expected properties directly in data
+        if (data.access_token && data.refresh_token) {
+          localStorage.setItem('authTokens', JSON.stringify({
+            access_token: data.access_token,
+            refresh_token: data.refresh_token
+          }));
+          localStorage.setItem('authToken', data.access_token);
+        } else if (data.token) {
+          // Fallback for older API format
+          localStorage.setItem('authToken', data.token);
+          localStorage.setItem('authTokens', JSON.stringify({
+            access_token: data.token,
+            refresh_token: data.token
+          }));
+        } else {
+          console.warn('[Auth Hook] Unexpected data format:', data);
+        }
+
+        // The user data might be directly in data.user or data itself
+        const userData = data.user || data;
+        console.log('[Auth Hook] User data:', userData);
+        localStorage.setItem('userData', JSON.stringify(userData));
+        setUser(userData);
+        return true;
+      } else {
+        setError('Login failed - no data returned');
+        return false;
+      }
+    } catch (error) {
+      console.error('[Auth Hook] Login error:', error);
+      setError('Network error. Please check your connection and try again.');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const register = async (username: string, email: string, password: string, role: string = 'patient'): Promise<boolean> => {
+    setLoading(true);
+    setError(null);
+
+    try {
+      const useMockAuth = await isDemoMode();      
+      if (useMockAuth) {
+        try {
+          // Include role in mock registration
+          const mockUser = await mockRegister(username, email, password);
+          
+          // Add role to mock user
+          const mockUserWithRole = { ...mockUser, role };
+
+          if (mockUser) {
+            localStorage.setItem('userData', JSON.stringify(mockUserWithRole));
+            setUser(mockUserWithRole);
+            setUsingMockAuth(true);
+            console.log("User registered successfully (mock mode).");
+            
+            // Set a session flag to show success notification on login page
+            if (typeof window !== 'undefined') {
+              sessionStorage.setItem('registrationSuccess', 'true');
+              sessionStorage.setItem('registeredEmail', email || '');
+            }
+            
+            router.push('/login');
+            return true;
+          } else {
+            setError('Registration failed in mock mode');
+            return false;
+          }
+        } catch (err) {
+          // Convert the regular Error to a ValidationError
+          if (err instanceof Error && err.message.includes('already exists')) {
+            setError(`Username is already taken\nusername: ${err.message}`);
+          } else {
+            setError((err as Error).message || 'Registration failed in mock mode');
+          }
+          return false;
+        }
+      }
+
+      // Include role in the API request
+      const response = await apiRequest<any>({
+        endpoint: '/auth/signup/',
+        method: 'POST',
+        body: { username, email, password, role },
+        requiresAuth: false
+      });
+      
+      if (response.error) {
+        // Check if this is a validation error with detailed field errors
+        if (isValidationError(response.error)) {
+          // Format field errors into a readable message
+          const fieldErrors = Object.entries(response.error.fields)
+            .map(([field, message]) => `${field}: ${message}`)
+            .join('\n');
+          
+          // Specifically handle username already exists error with a more user-friendly message
+          if (response.error.fields.username && 
+              typeof response.error.fields.username === 'string' &&
+              response.error.fields.username.toLowerCase().includes('already exists')) {
+            setError(`Username is already taken\nusername: ${response.error.fields.username}`);
+          } else {
+            // Create a more structured error message that can be parsed by the form component
+            setError(`${response.error.message || 'Validation failed'}\n${fieldErrors}`);
+          }
+        } else {
+          // Use the error message directly
+          setError(response.error.message || 'Registration failed');
+        }
+        return false;
+      }
+
+      const data = response.data;
+
+      if (data) {
+        // Show success message and redirect to login
+        console.log("User registered successfully.");
+        
+        // Set a session flag to show success notification on login page
+        if (typeof window !== 'undefined') {
+          sessionStorage.setItem('registrationSuccess', 'true');
+          sessionStorage.setItem('registeredEmail', email || '');
+        }
+        
+        router.push('/login');
+        return true;
+      } else {
+        setError('Registration failed - no data returned');
+        return false;
+      }
+    } catch (error) {
+      console.error('Registration error:', error);
+      setError('Network error. Please check your connection and try again.');
+      return false;
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const logout = () => {
+    localStorage.removeItem('authTokens');
+    localStorage.removeItem('authToken');
+    localStorage.removeItem('userData');
+    setUser(null);
+    router.push('/login');
+    console.log("User logged out.");
+  };
+
+  return (
+    <AuthContext.Provider
+      value={{
+        user,
+        loading,
+        login,
+        register,
+        logout,
+        isLoading: loading,
+        isAuthenticatedUser: !!user,
+        error,
+        setError, // Expose setError function
+      }}
+    >
+      {children}
+    </AuthContext.Provider>
+  );
+};
+
+export const useAuth = () => {
+  const context = useContext(AuthContext);
+  if (!context) {
+    throw new Error('useAuth must be used within an AuthProvider');
+  }
+  return context;
+};
+
+export default useAuth;

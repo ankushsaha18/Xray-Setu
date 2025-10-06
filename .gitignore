@@ -1,0 +1,47 @@
+# Dependencies
+node_modules/
+
+# Build outputs
+xraysetu/.next/
+xraysetu/out/
+
+# Cache files
+xraysetu/.next/cache/
+*.cache
+
+# Logs
+logs
+*.log
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# IDE files
+.vscode/
+.idea/
+
+# Large binary files
+*.dmg
+*.pkg
+*.exe
+*.msi
+
+# Environment files
+.env
+.env.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Docker
+docker-compose.override.yml
+
+# Temporary files
+tmp/
+temp/

@@ -1,0 +1,58 @@
+services:
+  # PostgreSQL Database
+  - type: pserv
+    name: xraysetu-db
+    env: postgres
+    plan: free
+    disk:
+      sizeGB: 10
+    envVars:
+      - key: POSTGRES_USER
+        value: xrayuser
+      - key: POSTGRES_PASSWORD
+        value: xraypass
+      - key: POSTGRES_DB
+        value: xraydb
+
+  # Django Backend
+  - type: web
+    name: xraysetu-backend
+    env: docker
+    dockerfilePath: ./backend/core/Dockerfile
+    dockerContext: ./backend/core
+    plan: free
+    envVars:
+      - key: DEBUG
+        value: "False"
+      - key: SECRET_KEY
+        generateValue: true
+      - key: DATABASE_URL
+        fromDatabase:
+          name: xraysetu-db
+          property: connectionString
+    buildCommand: docker build -t xraysetu-backend ./backend/core
+    startCommand: python manage.py migrate && python manage.py collectstatic --noinput && gunicorn core.wsgi:application --bind 0.0.0.0:$PORT
+
+  # Next.js Frontend
+  - type: web
+    name: xraysetu-frontend
+    env: docker
+    dockerfilePath: ./xraysetu/Dockerfile
+    dockerContext: ./xraysetu
+    plan: free
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: "https://your-backend-service.onrender.com/api"
+    buildCommand: docker build -t xraysetu-frontend ./xraysetu
+    startCommand: node server.js
+
+  # Nginx Reverse Proxy
+  - type: web
+    name: xraysetu-nginx
+    env: docker
+    dockerfilePath: ./nginx/Dockerfile  # You'll need to create this
+    dockerContext: ./nginx
+    plan: free
+    routes:
+      - type: web
+        name: xraysetu-app
