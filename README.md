@@ -143,17 +143,15 @@ API documentation is available at `/api/docs/` when the backend server is runnin
 
 ## Screenshots
 
-### Application Dashboard
-![Application Dashboard](Screenshot%202025-09-24%20at%2012.20.22%E2%80%AFAM.png)
-
-### X-ray Analysis Interface
-![X-ray Analysis](Screenshot%202025-09-24%20at%2012.20.32%E2%80%AFAM.png)
-
-### Diagnostic Report
-![Diagnostic Report](Screenshot%202025-09-24%20at%2012.20.56%E2%80%AFAM.png)
-
-### AI Model Training Visualization
-![Model Training](backend/core/imaging_service/model/training_history.png)
+![Screenshot 1](Screenshot%202025-09-24%20at%2012.20.22%E2%80%AFAM.png)
+![Screenshot 2](Screenshot%202025-09-24%20at%2012.20.32%E2%80%AFAM.png)
+![Screenshot 3](Screenshot%202025-09-24%20at%2012.20.56%E2%80%AFAM.png)
+![Screenshot 4](Screenshot%202025-09-24%20at%2012.21.15%E2%80%AFAM.png)
+![Screenshot 5](Screenshot%202025-09-24%20at%2012.21.36%E2%80%AFAM.png)
+![Screenshot 6](Screenshot%202025-09-24%20at%2012.21.47%E2%80%AFAM.png)
+![Screenshot 7](Screenshot%202025-09-24%20at%2012.22.17%E2%80%AFAM.png)
+![Screenshot 8](Screenshot%202025-09-24%20at%2012.22.40%E2%80%AFAM.png)
+![Screenshot 9](Screenshot%202025-09-24%20at%2012.24.48%E2%80%AFAM.png)
 
 ## Contributing
 
