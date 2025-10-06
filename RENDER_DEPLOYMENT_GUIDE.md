@@ -1,6 +1,6 @@
-# Xray Setu Render Deployment Guide
+# Deploying Xray-Setu on Render
 
-This guide provides step-by-step instructions for deploying Xray Setu to Render.
+This guide provides detailed instructions for deploying the Xray-Setu application on Render with all services properly configured.
 
 ## Prerequisites
 
@@ -8,11 +8,19 @@ This guide provides step-by-step instructions for deploying Xray Setu to Render.
 2. A GitHub account
 3. This repository forked to your GitHub account
 
-## Deployment Steps
+## Deployment Architecture
+
+The Xray-Setu application consists of four main services:
+1. **PostgreSQL Database** - For data storage
+2. **Django Backend** - API and business logic
+3. **Next.js Frontend** - User interface
+4. **Nginx Reverse Proxy** - Traffic routing
+
+## Step-by-Step Deployment
 
 ### 1. Fork the Repository
 
-1. Go to the GitHub repository
+1. Go to your GitHub repository
 2. Click the "Fork" button in the top right corner
 3. Choose your account as the destination for the fork
 
@@ -20,61 +28,87 @@ This guide provides step-by-step instructions for deploying Xray Setu to Render.
 
 1. Log in to your Render dashboard
 2. Click "New" → "PostgreSQL"
-3. Choose a name (e.g., "xraysetu-db")
-4. Select your preferred region
-5. Choose the free tier or a paid tier based on your needs
-6. Click "Create Database"
+3. Configure with these settings:
+   - Name: `xraysetu-db`
+   - Region: Choose the one closest to your users
+   - Plan: Free or paid based on your needs
+4. Click "Create Database"
+5. Note the database connection details (you'll need these later)
 
-### 3. Deploy Backend Service
+### 3. Deploy Django Backend Service
 
 1. In your Render dashboard, click "New" → "Web Service"
 2. Connect your GitHub account if not already connected
 3. Select your forked repository
-4. Set the following configuration:
+4. Configure with these settings:
    - Name: `xraysetu-backend`
-   - Root Directory: `/backend/core`
-   - Environment: `Python 3`
-   - Build Command: `./prebuild.sh && pip install -r requirements.txt && python manage.py migrate && python manage.py collectstatic --noinput`
-   - Start Command: `gunicorn core.wsgi:application -b 0.0.0.0:$PORT`
+   - Root Directory: `backend/core`
+   - Environment: Docker
+   - Dockerfile Path: `./Dockerfile`
+   - Plan: Free or paid based on your needs
 5. Click "Create Web Service"
-
-Note: The backend uses Python 3.11.9 to ensure compatibility with all required packages.
 
 ### 4. Configure Backend Environment Variables
 
-In your backend service settings, add these environment variables:
+After the backend service is created, go to its settings and add these environment variables:
 
-1. `SECRET_KEY` - Generate a secure Django secret key
-2. `DEBUG` - Set to `False`
-3. `DATABASE_URL` - This should be automatically populated from your PostgreSQL database
-4. `ALLOWED_HOSTS` - Comma-separated list of your frontend domains (e.g., `xraysetu-frontend.onrender.com`)
+| Variable | Description | Example Value |
+|----------|-------------|---------------|
+| `SECRET_KEY` | Django secret key (generate a secure one) | `your-very-secure-secret-key` |
+| `DEBUG` | Debug mode | `False` |
+| `DATABASE_URL` | PostgreSQL connection (from your database) | (Auto-populated by Render) |
+| `ALLOWED_HOSTS` | Allowed domains | `xraysetu-frontend.onrender.com,xraysetu-backend.onrender.com` |
 
-### 5. Deploy Frontend Service
+### 5. Deploy Next.js Frontend Service
 
-1. In your Render dashboard, click "New" → "Static Site" (recommended) or "Web Service"
+1. In your Render dashboard, click "New" → "Web Service"
 2. Select the same GitHub repository
-3. Set the following configuration:
+3. Configure with these settings:
    - Name: `xraysetu-frontend`
-   - Root Directory: `/xraysetu`
-   - Build Command: `npm install && npm run build`
-   - Publish Directory: `out` (if using Static Site) or leave empty (if using Web Service)
-4. If using Web Service, also set:
-   - Start Command: `npm start`
-5. Click "Create Static Site" or "Create Web Service"
+   - Root Directory: `xraysetu`
+   - Environment: Docker
+   - Dockerfile Path: `./Dockerfile`
+   - Plan: Free or paid based on your needs
+4. Click "Create Web Service"
 
 ### 6. Configure Frontend Environment Variables
 
-In your frontend service settings, add this environment variable:
+After the frontend service is created, go to its settings and add this environment variable:
 
-1. `NEXT_PUBLIC_API_URL` - Set to your backend service URL (e.g., `https://xraysetu-backend.onrender.com`)
+| Variable | Description | Example Value |
+|----------|-------------|---------------|
+| `NEXT_PUBLIC_API_URL` | Backend API URL | `https://xraysetu-backend.onrender.com` |
 
-### 7. Update CORS Settings (if needed)
+### 7. Deploy Nginx Reverse Proxy
 
-If you encounter CORS issues, you may need to update the backend settings:
+1. In your Render dashboard, click "New" → "Web Service"
+2. Select the same GitHub repository
+3. Configure with these settings:
+   - Name: `xraysetu-nginx`
+   - Root Directory: `nginx`
+   - Environment: Docker
+   - Dockerfile Path: `./Dockerfile`
+   - Plan: Free or paid based on your needs
+   - Advanced settings → Add custom domain if needed
+4. Click "Create Web Service"
 
-1. Go to your backend service in Render
-2. Edit the `CORS_ALLOWED_ORIGINS` in `backend/core/core/settings.py` to include your frontend URL
-3. Redeploy the backend service
+### 8. Update Service Dependencies
+
+Since the services depend on each other, you'll need to update some configurations after all services are deployed:
+
+1. Get the actual URLs for your deployed services:
+   - Backend: `https://xraysetu-backend.onrender.com`
+   - Frontend: `https://xraysetu-frontend.onrender.com`
+
+2. Update the Nginx configuration to point to your actual services:
+   - Go to your nginx service settings
+   - You may need to modify the nginx.conf to use the actual service names
+
+### 9. Final Configuration
+
+1. In your backend service settings, update `ALLOWED_HOSTS` to include your nginx service URL
+2. In your frontend service, ensure `NEXT_PUBLIC_API_URL` points to your backend service
+3. Restart all services to apply the changes
 
 ## Environment Variables Summary
 
@@ -84,45 +118,56 @@ If you encounter CORS issues, you may need to update the backend settings:
 | `SECRET_KEY` | Django secret key | `your-very-secure-secret-key` |
 | `DEBUG` | Debug mode | `False` |
 | `DATABASE_URL` | PostgreSQL connection | (Auto-populated by Render) |
-| `ALLOWED_HOSTS` | Allowed domains | `xraysetu-frontend.onrender.com` |
+| `ALLOWED_HOSTS` | Allowed domains | `xraysetu-frontend.onrender.com,xraysetu-backend.onrender.com,xraysetu-nginx.onrender.com` |
 
 ### Frontend Variables
 | Variable | Description | Example Value |
 |----------|-------------|---------------|
 | `NEXT_PUBLIC_API_URL` | Backend API URL | `https://xraysetu-backend.onrender.com` |
 
-## Troubleshooting
+## Troubleshooting Common Issues
 
-### Common Issues
+### Database Connection Issues
+1. Ensure `DATABASE_URL` is correctly set from your PostgreSQL database
+2. Check that your database allows connections from your backend service
+3. Verify that the database user has proper permissions
 
-1. **Build Failures**: Check the build logs in your Render dashboard for specific error messages.
+### CORS Errors
+1. Ensure `CORS_ALLOWED_ORIGINS` in Django settings includes your frontend URL
+2. Check that `CSRF_TRUSTED_ORIGINS` includes your backend URL
 
-2. **Database Connection Issues**: 
-   - Ensure `DATABASE_URL` is correctly set
-   - Check that your database is running
-   - Verify that your database allows connections from your backend service
+### Static Files Not Loading
+1. Ensure `whitenoise` is in your requirements.txt
+2. Check that `STATIC_ROOT` and `STATICFILES_STORAGE` are properly configured
+3. Run `python manage.py collectstatic` during deployment
 
-3. **CORS Errors**: 
-   - Ensure `CORS_ALLOWED_ORIGINS` includes your frontend URL
-   - Check that `CSRF_TRUSTED_ORIGINS` includes your backend URL
+### Health Check Failures
+1. Verify that the `/health/` endpoint is working on the backend
+2. Check that the frontend health page is accessible at `/health`
+3. Ensure services are responding within the timeout period
 
-4. **Static Files Not Loading**: 
-   - Ensure `whitenoise` is in your requirements.txt
-   - Check that `STATIC_ROOT` and `STATICFILES_STORAGE` are properly configured
+### Nginx Configuration Issues
+1. Check that the nginx.conf file correctly references your backend and frontend services
+2. Ensure all services are running before testing the nginx proxy
 
-### Redeployment
+## Redeployment
 
 To redeploy after making changes:
-
 1. Push your changes to GitHub
 2. Render will automatically detect the changes and start a new build
 3. Or manually trigger a deploy from your service dashboard
 
+## Monitoring and Maintenance
+
+1. Regularly check your Render dashboard for service status
+2. Monitor logs for any errors or warnings
+3. Set up alerts for service downtime
+4. Regularly backup your database
+
 ## Support
 
-For issues specific to Xray Setu, please refer to:
+For issues specific to Xray-Setu, please refer to:
 - [README.md](README.md)
-- [DEPLOYMENT.md](DEPLOYMENT.md)
 - [TROUBLESHOOTING.md](TROUBLESHOOTING.md)
 
 For Render-specific issues, please check the [Render documentation](https://render.com/docs) or contact their support team.
