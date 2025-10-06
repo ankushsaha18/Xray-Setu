@@ -10,6 +10,7 @@ Xray-Setu is an innovative medical imaging diagnosis platform that leverages cut
 - [Docker Deployment](#docker-deployment)
 - [Public Deployment](#public-deployment)
 - [API Documentation](#api-documentation)
+- [Screenshots](#screenshots)
 - [Contributing](#contributing)
 - [License](#license)
 
@@ -139,6 +140,20 @@ For detailed public deployment instructions, see [DOCKER_DEPLOYMENT.md](DOCKER_D
 ## API Documentation
 
 API documentation is available at `/api/docs/` when the backend server is running.
+
+## Screenshots
+
+### Application Dashboard
+![Application Dashboard](Screenshot%202025-09-24%20at%2012.20.22%E2%80%AFAM.png)
+
+### X-ray Analysis Interface
+![X-ray Analysis](Screenshot%202025-09-24%20at%2012.20.32%E2%80%AFAM.png)
+
+### Diagnostic Report
+![Diagnostic Report](Screenshot%202025-09-24%20at%2012.20.56%E2%80%AFAM.png)
+
+### AI Model Training Visualization
+![Model Training](backend/core/imaging_service/model/training_history.png)
 
 ## Contributing
 
