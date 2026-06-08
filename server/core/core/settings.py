@@ -139,9 +139,9 @@ else:
         "http://localhost:3003",
         "http://127.0.0.1:3000",
         "http://192.168.29.83:3000",
-        "https://xraysetu.netlify.app",
     ]
 
+CORS_ALLOW_ALL_ORIGINS = True
 # Allow credentials to be included in CORS requests
 CORS_ALLOW_CREDENTIALS = True
 
