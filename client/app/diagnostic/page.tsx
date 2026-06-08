@@ -31,7 +31,7 @@ export default function DiagnosticPage() {
     // Test backend accessibility
     const testBackend = async () => {
       try {
-        const response = await fetch(`${apiUrl}/auth/login/`, {
+        const response = await fetch(`${apiUrl}/api/auth/login/`, {
           method: 'OPTIONS',
           headers: {
             'Origin': frontendUrl,
@@ -56,7 +56,7 @@ export default function DiagnosticPage() {
     // Test CORS
     const testCors = async () => {
       try {
-        const response = await fetch(`${apiUrl}/auth/login/`, {
+        const response = await fetch(`${apiUrl}/api/auth/login/`, {
           method: 'POST',
           headers: {
             'Content-Type': 'application/json',

@@ -173,7 +173,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       console.log('[Auth Hook] Calling API for login');
       const response = await apiRequest<any>({
-        endpoint: '/auth/login/',
+        endpoint: '/api/auth/login/',
         method: 'POST',
         body: { username, password },
         requiresAuth: false
@@ -275,7 +275,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
       // Include role in the API request
       const response = await apiRequest<any>({
-        endpoint: '/auth/signup/',
+        endpoint: '/api/auth/signup/',
         method: 'POST',
         body: { username, email, password, role },
         requiresAuth: false

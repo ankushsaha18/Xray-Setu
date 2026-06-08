@@ -133,7 +133,7 @@ export async function loginUser(email: string, password: string): Promise<AuthRe
   // Live Mode: Make actual API request
   try {
     const response = await makeAuthRequest<AuthResponse>(
-      '/auth/login/',
+      '/api/auth/login/',
       'POST',
       { email, password }
     );
@@ -201,7 +201,7 @@ export async function signupUser(email: string, password: string): Promise<AuthR
   try {
     // First, register the user
     const signupResponse = await makeAuthRequest<{ message: string }>(
-      '/auth/signup/',
+      '/api/auth/signup/',
       'POST',
       { email, password }
     );

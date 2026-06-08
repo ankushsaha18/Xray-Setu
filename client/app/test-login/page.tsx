@@ -16,7 +16,7 @@ export default function TestLoginPage() {
     try {
       console.log('Testing API request...');
       const response = await apiRequest({
-        endpoint: '/auth/login/',
+        endpoint: '/api/auth/login/',
         method: 'POST',
         body: {
           username: 'testuser',
