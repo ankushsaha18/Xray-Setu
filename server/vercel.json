@@ -1,0 +1,20 @@
+{
+  "version": 2,
+  "installCommand": "cd core && pip install -r requirements.txt",
+  "builds": [
+    {
+      "src": "core/core/wsgi.py",
+      "use": "@vercel/python",
+      "config": {
+        "maxLambdaSize": "50mb",
+        "runtime": "python3.11"
+      }
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "core/core/wsgi.py"
+    }
+  ]
+}
