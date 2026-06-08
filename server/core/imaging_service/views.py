@@ -7,12 +7,27 @@ from rest_framework.permissions import IsAuthenticated
 from .knowledge_base import calculate
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
-from .model.model_predict import predict_pneumonia
 import os
 from .stt_whisper import WhisperTranscriber
 from .stt_gemini import GeminiTranscriber
 from .stt_deepgram import DeepgramTranscriber
 from .nlp_symptoms import extract_symptoms, to_vitals_flags
+
+
+class PredictionUnavailableError(Exception):
+    pass
+
+
+def predict_pneumonia_or_raise(image_file):
+    try:
+        from .model.model_predict import predict_pneumonia
+    except ImportError as exc:
+        raise PredictionUnavailableError(
+            "X-ray prediction is unavailable in this deployment because the ML dependencies are not installed."
+        ) from exc
+
+    return predict_pneumonia(image_file)
+
 
 @api_view(['POST'])
 @authentication_classes([JWTAuthentication])
@@ -31,7 +46,7 @@ def upload_scan(request):
         image_file = request.FILES['image']
 
         # Check if the patient has pneumonia
-        has_pneumonia = predict_pneumonia(image_file)
+        has_pneumonia = predict_pneumonia_or_raise(image_file)
         
         # Calculate age from birthdate
         try:
@@ -92,6 +107,8 @@ def upload_scan(request):
         
         return Response(result, status=status.HTTP_201_CREATED)
             
+    except PredictionUnavailableError as e:
+        return Response({'error': str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)
 
@@ -213,7 +230,7 @@ def multimodal_diagnosis(request):
         has_pneumonia_flag = False
         if 'image' in request.FILES:
             image_file = request.FILES['image']
-            has_pneumonia_flag = predict_pneumonia(image_file)
+            has_pneumonia_flag = predict_pneumonia_or_raise(image_file)
 
         # Age handling
         birthdate_str = request.data.get('birthdate') or (request.data.get('patient', {}).get('birthdate') if isinstance(request.data, dict) else None)
@@ -262,5 +279,7 @@ def multimodal_diagnosis(request):
         fused['derivedSymptoms'] = extracted
         fused['imaging'] = {'pneumoniaPositive': bool(has_pneumonia_flag)}
         return Response(fused, status=status.HTTP_200_OK)
+    except PredictionUnavailableError as e:
+        return Response({'error': str(e)}, status=status.HTTP_503_SERVICE_UNAVAILABLE)
     except Exception as e:
         return Response({'error': str(e)}, status=status.HTTP_500_INTERNAL_SERVER_ERROR)

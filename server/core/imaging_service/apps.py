@@ -1,6 +1,5 @@
 from django.apps import AppConfig
-
-from .model.model_loader import ModelLoader
+import os
 
 
 class ImagingServiceConfig(AppConfig):
@@ -8,8 +7,12 @@ class ImagingServiceConfig(AppConfig):
     name = 'imaging_service'
 
     def ready(self):
+        if os.getenv('VERCEL') or os.getenv('DISABLE_MODEL_PRELOAD', '').lower() == 'true':
+            return
+
         # Preload model when Django starts
         try:
+            from .model.model_loader import ModelLoader
             ModelLoader.get_instance().load_model()
         except Exception as e:
             # Log error but don't crash the app
