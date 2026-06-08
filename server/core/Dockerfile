@@ -14,8 +14,12 @@ RUN apt-get update \
 # Copy requirements file
 COPY requirements.txt .
 
-# Install Python dependencies
-RUN pip install --no-cache-dir -r requirements.txt
+# Upgrade pip first
+RUN pip install --upgrade pip
+
+# Install Python dependencies with increased timeout and retries for large packages
+# Using longer timeout (600 seconds) and more retries for TensorFlow and other large packages
+RUN pip install --no-cache-dir --timeout=600 --retries=10 -r requirements.txt
 
 # Copy project files
 COPY . .

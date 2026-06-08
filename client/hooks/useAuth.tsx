@@ -282,6 +282,9 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
       });
       
       if (response.error) {
+        console.log('[Auth Hook] Registration error:', response.error);
+        console.log('[Auth Hook] Error type:', response.error.constructor.name);
+        
         // Check if this is a validation error with detailed field errors
         if (isValidationError(response.error)) {
           // Format field errors into a readable message
@@ -296,11 +299,14 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
             setError(`Username is already taken\nusername: ${response.error.fields.username}`);
           } else {
             // Create a more structured error message that can be parsed by the form component
-            setError(`${response.error.message || 'Validation failed'}\n${fieldErrors}`);
+            const errorMessage = response.error.message || 'Validation failed';
+            setError(`${errorMessage}\n${fieldErrors}`);
           }
         } else {
           // Use the error message directly
-          setError(response.error.message || 'Registration failed');
+          const errorMessage = response.error.message || 'Registration failed';
+          console.log('[Auth Hook] Setting error message:', errorMessage);
+          setError(errorMessage);
         }
         return false;
       }

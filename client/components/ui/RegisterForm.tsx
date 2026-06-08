@@ -29,6 +29,14 @@ const RegisterForm = ({ userType = 'patient' }: { userType?: 'patient' | 'nurse'
     }));
   }, [userType]);
 
+  // Sync error from useAuth to local state for better reactivity
+  useEffect(() => {
+    if (error) {
+      console.log('[RegisterForm] Error received from useAuth:', error);
+      // The error will be processed by useMemo below
+    }
+  }, [error]);
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
     setFormData({
       ...formData,
@@ -70,6 +78,8 @@ const RegisterForm = ({ userType = 'patient' }: { userType?: 'patient' | 'nurse'
     }
     
     setIsLoading(true);
+    setError(null); // Clear any previous errors from useAuth
+    setApiError(null); // Clear any previous API errors
     
     try {
       // Use the updated register function that includes role
@@ -77,8 +87,14 @@ const RegisterForm = ({ userType = 'patient' }: { userType?: 'patient' | 'nurse'
       
       // If registration is successful, the router will redirect in useAuth.tsx
       // If not, we'll get errors in the error state from useAuth
+      if (!success) {
+        // Error is already set in useAuth context, but we need to sync it to local state
+        // The error will be available in the next render via the useMemo hook
+        console.log('Registration failed, error should be in useAuth context');
+      }
     } catch (err) {
       console.error('Registration error:', err);
+      setApiError(err instanceof Error ? err.message : 'Registration failed. Please try again.');
     } finally {
       setIsLoading(false);
     }
@@ -128,6 +144,41 @@ const RegisterForm = ({ userType = 'patient' }: { userType?: 'patient' | 'nurse'
       return [validationError, {}];
     }
     
+    // Check error from useAuth first (this is set by the register function)
+    if (error) {
+      console.log('[RegisterForm] Error from useAuth:', error);
+      try {
+        // Process field-specific errors
+        let newFieldErrors: Record<string, string> = {};
+        
+        // First check for field-specific errors in the format "field: error message"
+        if (error.includes('\n')) {
+          const lines = error.split('\n');
+          
+          for (let i = 1; i < lines.length; i++) {
+            const line = lines[i];
+            const [field, ...messageParts] = line.split(':');
+            if (messageParts.length && field) {
+              newFieldErrors[field.trim()] = messageParts.join(':').trim();
+            }
+          }
+        }
+        
+        // Special case for username exists
+        if (error.toLowerCase().includes('username') && 
+            error.toLowerCase().includes('exists')) {
+          newFieldErrors.username = 'A user with that username already exists.';
+        }
+        
+        const parsedError = parseApiError(error);
+        console.log('[RegisterForm] Parsed error:', parsedError, 'Field errors:', newFieldErrors);
+        return [parsedError, newFieldErrors];
+      } catch (e) {
+        console.error('Error parsing API error:', e);
+        return [error, {}];
+      }
+    }
+    
     if (apiError) {
       try {
         // Process field-specific errors
@@ -159,39 +210,8 @@ const RegisterForm = ({ userType = 'patient' }: { userType?: 'patient' | 'nurse'
       }
     }
     
-    if (error) {
-      try {
-        // Process field-specific errors
-        let newFieldErrors: Record<string, string> = {};
-        
-        // First check for field-specific errors in the format "field: error message"
-        if (error.includes('\n')) {
-          const lines = error.split('\n');
-          
-          for (let i = 1; i < lines.length; i++) {
-            const line = lines[i];
-            const [field, ...messageParts] = line.split(':');
-            if (messageParts.length && field) {
-              newFieldErrors[field.trim()] = messageParts.join(':').trim();
-            }
-          }
-        }
-        
-        // Special case for username exists
-        if (error.toLowerCase().includes('username') && 
-            error.toLowerCase().includes('exists')) {
-          newFieldErrors.username = 'A user with that username already exists.';
-        }
-        
-        return [parseApiError(error), newFieldErrors];
-      } catch (e) {
-        console.error('Error parsing API error:', e);
-        return [error, {}];
-      }
-    }
-    
     return [undefined, {}];
-  }, [validationError, apiError, error]);
+  }, [validationError, error, apiError]);
     // Apply parsed field errors
   useEffect(() => {
     if (Object.keys(parsedFieldErrors).length > 0) {

@@ -2,11 +2,6 @@
 const nextConfig = {
   reactStrictMode: true,
   images: {
-    domains: [
-      'localhost',
-      'backend-service-url.com', // Replace with your actual backend domain if needed
-      'vercel.app'
-    ],
     remotePatterns: [
       {
         protocol: 'https',
@@ -15,6 +10,14 @@ const nextConfig = {
       {
         protocol: 'http',
         hostname: 'localhost',
+      },
+      {
+        protocol: 'http',
+        hostname: 'backend-service-url.com',
+      },
+      {
+        protocol: 'https',
+        hostname: '*.vercel.app',
       }
     ],
   },

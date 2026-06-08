@@ -15,12 +15,12 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = '&e1etmi)f6tvu4(#1$fzqf3$=sldi+r0kgy8a#@!nf-qij#6=c'
+SECRET_KEY = os.getenv('SECRET_KEY', '&e1etmi)f6tvu4(#1$fzqf3$=sldi+r0kgy8a#@!nf-qij#6=c')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
 
-ALLOWED_HOSTS = ['*','localhost']
+ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',') if os.getenv('ALLOWED_HOSTS') else ['*']
 
 
 # Application definition
@@ -44,6 +44,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.contrib.sessions.middleware.SessionMiddleware', 
     'django.middleware.common.CommonMiddleware',
+    'core.middleware.DisableCSRFMiddleware',  # Custom middleware to disable CSRF for API routes
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.contrib.auth.middleware.AuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
@@ -83,6 +84,8 @@ database_url = os.getenv("DATABASE_URL")
 
 if database_url:
     tmpPostgres = urlparse(database_url)
+    # Extract port from URL if present, otherwise use default 5432
+    port = tmpPostgres.port if tmpPostgres.port else 5432
     DATABASES = {
         'default': {
             'ENGINE': 'django.db.backends.postgresql',
@@ -90,7 +93,7 @@ if database_url:
             'USER': tmpPostgres.username,
             'PASSWORD': tmpPostgres.password,
             'HOST': tmpPostgres.hostname,
-            'PORT': 5432,
+            'PORT': port,
         }
     }
 else:
@@ -120,19 +123,66 @@ AUTH_PASSWORD_VALIDATORS = [
         'NAME': 'django.contrib.auth.password_validation.NumericPasswordValidator',
     },
 ]
-# For Next.js integration
-CORS_ALLOWED_ORIGINS = [
-    "http://localhost:3000",  # Your Next.js address
-    "http://localhost:3001",  # Your Next.js address when port 3000 is occupied
-    "http://localhost:3002",  # Your Next.js address when port 3000 and 3001 are occupied
-    "http://localhost:3003",  # Your Next.js address when port 3000, 3001, and 3002 are occupied
+# For Next.js integration and Railway deployment
+# Allow all origins if CORS_ALLOWED_ORIGINS is not set, otherwise use the list
+cors_origins_env = os.getenv('CORS_ALLOWED_ORIGINS', '')
+if cors_origins_env:
+    CORS_ALLOWED_ORIGINS = [origin.strip() for origin in cors_origins_env.split(',')]
+else:
+    # Default localhost origins for development
+    CORS_ALLOWED_ORIGINS = [
+        "http://localhost",
+        "http://localhost:80",
+        "http://localhost:3000",
+        "http://localhost:3001",
+        "http://localhost:3002",
+        "http://localhost:3003",
+    ]
+
+# Allow credentials to be included in CORS requests
+CORS_ALLOW_CREDENTIALS = True
+
+# Allow all methods for API endpoints
+CORS_ALLOW_METHODS = [
+    'DELETE',
+    'GET',
+    'OPTIONS',
+    'PATCH',
+    'POST',
+    'PUT',
+]
+
+# Allow common headers
+CORS_ALLOW_HEADERS = [
+    'accept',
+    'accept-encoding',
+    'authorization',
+    'content-type',
+    'dnt',
+    'origin',
+    'user-agent',
+    'x-csrftoken',
+    'x-requested-with',
 ]
 
 REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_simplejwt.authentication.JWTAuthentication',
     ),
+    'DEFAULT_PERMISSION_CLASSES': [
+        'rest_framework.permissions.AllowAny',
+    ],
+    # Disable CSRF for API views (using JWT instead)
+    'DEFAULT_RENDERER_CLASSES': [
+        'rest_framework.renderers.JSONRenderer',
+    ],
 }
+
+# CSRF settings - exempt API endpoints
+CSRF_TRUSTED_ORIGINS = CORS_ALLOWED_ORIGINS.copy()
+# Disable CSRF cookie for API-only endpoints
+CSRF_COOKIE_HTTPONLY = False
+CSRF_USE_SESSIONS = False
 
 
 # Internationalization
@@ -162,3 +212,6 @@ STATICFILES_STORAGE = 'whitenoise.storage.CompressedManifestStaticFilesStorage'
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
 
 AUTH_USER_MODEL = 'auth_service.CustomUser'
+
+# Disable automatic appending of slashes to URLs
+APPEND_SLASH = False

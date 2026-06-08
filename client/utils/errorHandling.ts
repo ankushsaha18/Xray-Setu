@@ -77,9 +77,10 @@ export function createErrorFromApiResponse(status: number, data: any): Error {
         return new ValidationError(nonFieldErrors, { 'general': nonFieldErrors });
       }
       
-      // Handle regular field errors
+      // Handle regular field errors (Django REST Framework format)
       Object.entries(data).forEach(([key, value]) => {
         if (Array.isArray(value)) {
+          // Join array of error messages
           fields[key] = value.join(', ');
         } else if (typeof value === 'string') {
           fields[key] = value;
@@ -91,14 +92,15 @@ export function createErrorFromApiResponse(status: number, data: any): Error {
     }
     
     // Find a suitable message from the fields
-    let message = 'Validation failed';
+    let message = 'Please check your input and try again';
     if (Object.keys(fields).length > 0) {
       // Use the first field error as the main message
       const firstField = Object.keys(fields)[0];
-      message = `${firstField}: ${fields[firstField]}`;
+      const firstError = fields[firstField];
+      message = `${firstField.charAt(0).toUpperCase() + firstField.slice(1)}: ${firstError}`;
     }
     
-    return new ValidationError(data?.message || message, fields);
+    return new ValidationError(message, fields);
   }
   
   // Server errors

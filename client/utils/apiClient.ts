@@ -54,10 +54,27 @@ function getAuthTokens(): {access_token: string | null, refresh_token: string | 
   return {access_token: null, refresh_token: null};
 }
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+// Get API base URL - use absolute URL if relative doesn't work
+const getApiBaseUrl = (): string => {
+  const envUrl = process.env.NEXT_PUBLIC_API_URL || 'http://localhost:8000';
+  
+  // If it's a relative URL (starts with /), we need to construct the full URL
+  if (envUrl.startsWith('/')) {
+    // In browser, use window.location.origin; in server, use localhost
+    if (typeof window !== 'undefined') {
+      return window.location.origin + envUrl;
+    }
+    return 'http://localhost' + envUrl;
+  }
+  
+  return envUrl;
+};
+
+const API_BASE_URL = getApiBaseUrl();
 
 export async function apiRequest<T>(config: ApiRequestConfig): Promise<ApiResponse<T>> {
   console.log('[API Client] Starting request with config:', config);
+  console.log('[API Client] API_BASE_URL:', API_BASE_URL);
   
   // First, check if we're in demo mode
   const demoMode = await isDemoMode();
@@ -208,6 +225,8 @@ export async function apiRequest<T>(config: ApiRequestConfig): Promise<ApiRespon
     } catch (error) {
       // Handle network errors and aborts
       console.error('[API Client] Network error:', error);
+      console.error('[API Client] Error type:', error instanceof Error ? error.constructor.name : typeof error);
+      console.error('[API Client] Error message:', error instanceof Error ? error.message : String(error));
       
       if (error instanceof Error) {
         if (error.name === 'AbortError') {
@@ -222,7 +241,7 @@ export async function apiRequest<T>(config: ApiRequestConfig): Promise<ApiRespon
           
           return {
             data: null,
-            error: new NetworkError('Request timed out.'),
+            error: new NetworkError('Request timed out. Please try again.'),
             statusCode: null,
             loading: false
           };
@@ -232,7 +251,8 @@ export async function apiRequest<T>(config: ApiRequestConfig): Promise<ApiRespon
         if (currentRetry < retries && (
           error.message.includes('Failed to fetch') || 
           error.message.includes('NetworkError') ||
-          error.message.includes('network')
+          error.message.includes('network') ||
+          error.message.includes('Load failed')
         )) {
           currentRetry++;
           console.log(`[API Client] Retrying (${currentRetry}/${retries}) after error:`, error.message);
@@ -240,9 +260,15 @@ export async function apiRequest<T>(config: ApiRequestConfig): Promise<ApiRespon
           continue;
         }
         
+        // Provide a more user-friendly error message
+        let errorMessage = error.message;
+        if (error.message.includes('Failed to fetch') || error.message.includes('Load failed')) {
+          errorMessage = 'Unable to connect to the server. Please check your internet connection and try again.';
+        }
+        
         return {
           data: null,
-          error: new NetworkError(error.message),
+          error: new NetworkError(errorMessage),
           statusCode: null,
           loading: false
         };
@@ -250,7 +276,7 @@ export async function apiRequest<T>(config: ApiRequestConfig): Promise<ApiRespon
       
       return {
         data: null,
-        error: new Error('Unknown error occurred'),
+        error: new Error('An unexpected error occurred. Please try again.'),
         statusCode: null,
         loading: false
       };

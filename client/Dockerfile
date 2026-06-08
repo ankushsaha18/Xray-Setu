@@ -21,12 +21,12 @@ COPY --from=builder /app/.next/standalone ./
 COPY --from=builder /app/.next/static ./.next/static
 COPY --from=builder /app/public ./public
 
-# Debug: Check what files were copied
-RUN ls -la
-
 # Create non-root user
 RUN addgroup -g 1001 -S nodejs
 RUN adduser -S nextjs -u 1001
+
+# Create .next/cache directory with proper permissions for Next.js image optimization
+RUN mkdir -p .next/cache && chown -R nextjs:nodejs .next && chown -R nextjs:nodejs /app
 
 USER nextjs
 
