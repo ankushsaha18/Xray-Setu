@@ -18,7 +18,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.getenv('SECRET_KEY', '&e1etmi)f6tvu4(#1$fzqf3$=sldi+r0kgy8a#@!nf-qij#6=c')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.getenv('DEBUG', 'True').lower() == 'true'
+DEBUG = os.getenv('DEBUG', 'False').lower() == 'true'
 
 ALLOWED_HOSTS = os.getenv('ALLOWED_HOSTS', '*').split(',') if os.getenv('ALLOWED_HOSTS') else ['*']
 
@@ -137,6 +137,8 @@ else:
         "http://localhost:3001",
         "http://localhost:3002",
         "http://localhost:3003",
+        "http://127.0.0.1:3000",
+        "http://192.168.29.83:3000",
     ]
 
 # Allow credentials to be included in CORS requests

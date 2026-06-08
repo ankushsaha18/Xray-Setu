@@ -6,7 +6,7 @@ export async function transcribeSymptoms(audio: File | Blob, language?: string):
   form.append('audio', audio, (audio as File)?.name || 'symptoms.webm');
   if (language) form.append('language', language);
   const res = await apiRequest<{ transcript: string; symptoms: Record<string, boolean> }>({
-    endpoint: '/api/symptoms/transcribe',
+    endpoint: '/api/imaging/symptoms/transcribe',
     method: 'POST',
     body: form,
     formData: true,
@@ -33,7 +33,7 @@ export async function multimodalDiagnose(params: { image?: File; vitals: Patient
   if (v.canSmellTaste !== undefined) form.append('canSmellTaste', String(v.canSmellTaste));
 
   const res = await apiRequest<AnalysisResult>({
-    endpoint: '/api/diagnosis/multimodal',
+    endpoint: '/api/imaging/diagnosis/multimodal',
     method: 'POST',
     body: form,
     formData: true,
