@@ -1,7 +1,0 @@
-services:
-  - type: web
-    name: xray-setu
-    runtime: python
-    rootDir: server
-    buildCommand: "./build.sh"
-    startCommand: "gunicorn core.wsgi:application"

@@ -4,4 +4,4 @@ services:
     runtime: python
     rootDir: server
     buildCommand: "./build.sh"
-    startCommand: "gunicorn core.wsgi:application"
+    startCommand: "cd core && gunicorn core.wsgi:application"
