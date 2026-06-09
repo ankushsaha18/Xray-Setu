@@ -3,7 +3,7 @@ from typing import Optional
 
 # Import google.generativeai with error handling
 try:
-    import google.generativeai as genai
+    import google as genai
     GENAI_AVAILABLE = True
 except ImportError:
     genai = None
