@@ -13,9 +13,9 @@ requests==2.32.3
 
 psycopg2-binary==2.9.10
 
-google-generativeai>=0.8.5
-tensorflow==2.21.0
-protobuf>=6.31.1,<8
+tensorflow==2.15.0
+protobuf==4.25.9
+google-generativeai==0.7.2
 numpy
 pillow
 h5py
