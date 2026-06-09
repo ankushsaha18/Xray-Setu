@@ -27,12 +27,15 @@ requests==2.32.3
 
 psycopg2-binary==2.9.10
 
-tensorflow==2.15.0
-numpy==1.26.4
-pillow==11.2.1
-h5py==3.11.0
-protobuf==4.25.9
+# ML
+tensorflow==2.18.0
+numpy==2.0.2
+h5py==3.12.1
+pillow==11.1.0
 
-# Gemini (NEW SDK)
-google-genai
+# Gemini
+google-generativeai==0.8.5
+
+# Let TensorFlow choose the correct protobuf
+protobuf>=5.28.0,<6
 
