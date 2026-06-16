@@ -35,7 +35,7 @@ def predict_pneumonia(image_file):
         
         # Get prediction
         cnn = ModelLoader.get_instance().get_model()
-        prediction = cnn.predict(img_array)  
+        prediction = cnn.predict(img_array,verbose=0)  
         # Get result with confidence
         has_pneumonia = bool(prediction[0][0] > 0.5)    
         confidence = float(prediction[0][0] if has_pneumonia else 1 - prediction[0][0])

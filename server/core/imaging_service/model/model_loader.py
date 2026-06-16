@@ -19,7 +19,7 @@ class ModelLoader:
         if self._model is None:
             try:
                 # Updated path to point directly to the .keras file in the same directory
-                model_path = os.path.join(os.path.dirname(__file__), 'pneumonia_model.keras')
+                model_path = os.path.join(os.path.dirname(__file__), 'pneumonia_model_new.keras')
                 logger.info(f"Loading model from {model_path}")
                 self._model = tf.keras.models.load_model(model_path)
                 logger.info("Model loaded successfully")
